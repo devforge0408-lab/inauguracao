@@ -22,13 +22,23 @@ const EVENT_DETAILS = {
   description:
     "Visita exclusiva e inauguração do novo Espaço Floresça — Saúde Integral Feminina.",
   location: "Espaço Floresça",
-  address: "Espaço Floresça · Saúde Integral Feminina",
+  building: "Edifício Golden Office",
+  room: "Sala 1108",
+  street: "Rua Cap. Cassiano Ricardo de Toledo, 191",
+  neighborhood: "Chácara Urbana",
+  city: "Jundiaí - SP",
+  cep: "13201-840",
+  fullAddress:
+    "Rua Cap. Cassiano Ricardo de Toledo, 191 - Sala 1108 (Edifício Golden Office) - Chácara Urbana, Jundiaí - SP, 13201-840",
+  shortAddress:
+    "Edifício Golden Office · Sala 1108 — Chácara Urbana, Jundiaí - SP",
   dateString: "Sábado, 12 de Setembro",
   mapsEmbedSrc:
-    "https://maps.google.com/maps?q=Espa%C3%A7o%20Flores%C3%A7a&t=&z=15&ie=UTF8&iwloc=&output=embed",
+    "https://maps.google.com/maps?q=Rua%20Cap.%20Cassiano%20Ricardo%20de%20Toledo%2C%20191%20Jundia%C3%AD&t=&z=16&ie=UTF8&iwloc=&output=embed",
   googleMapsUrl:
-    "https://www.google.com/maps/search/?api=1&query=Espa%C3%A7o+Flores%C3%A7a",
-  wazeUrl: "https://waze.com/ul?q=Espa%C3%A7o%20Flores%C3%A7a&navigate=yes",
+    "https://www.google.com/maps/search/?api=1&query=Rua+Cap.+Cassiano+Ricardo+de+Toledo,+191+-+Ch%C3%A1cara+Urbana,+Jundia%C3%AD+-+SP,+13201-840",
+  wazeUrl:
+    "https://waze.com/ul?q=Rua%20Cap.%20Cassiano%20Ricardo%20de%20Toledo%2C%20191%20Jundia%C3%AD&navigate=yes",
 };
 
 function formatWhatsapp(raw: string): string {
@@ -70,10 +80,10 @@ function getGoogleCalendarUrl(horario: string, guestName: string) {
   const { startUtc, endUtc } = getEventDates(horario);
   const title = encodeURIComponent(EVENT_DETAILS.title);
   const details = encodeURIComponent(
-    `Olá, ${guestName}! Sua visita exclusiva ao Espaço Floresça está confirmada para as ${horario}.\n\n${EVENT_DETAILS.description}\nEndereço: ${EVENT_DETAILS.address}`
+    `Olá, ${guestName}! Sua visita exclusiva ao Espaço Floresça está confirmada para as ${horario}.\n\n${EVENT_DETAILS.description}\n\nLocal: ${EVENT_DETAILS.building} · ${EVENT_DETAILS.room}\nEndereço: ${EVENT_DETAILS.fullAddress}`
   );
   const location = encodeURIComponent(
-    `${EVENT_DETAILS.location} - ${EVENT_DETAILS.address}`
+    `${EVENT_DETAILS.building} · ${EVENT_DETAILS.room} - ${EVENT_DETAILS.fullAddress}`
   );
 
   return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startUtc}/${endUtc}&details=${details}&location=${location}`;
@@ -89,8 +99,8 @@ function downloadIcs(horario: string, guestName: string) {
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",
     `SUMMARY:${EVENT_DETAILS.title}`,
-    `DESCRIPTION:Olá ${guestName}! Sua visita ao Espaço Floresça está confirmada para as ${horario}. ${EVENT_DETAILS.address}`,
-    `LOCATION:${EVENT_DETAILS.location} - ${EVENT_DETAILS.address}`,
+    `DESCRIPTION:Olá ${guestName}! Sua visita ao Espaço Floresça está confirmada para as ${horario}. ${EVENT_DETAILS.building} · ${EVENT_DETAILS.room}. ${EVENT_DETAILS.fullAddress}`,
+    `LOCATION:${EVENT_DETAILS.building} · ${EVENT_DETAILS.room} - ${EVENT_DETAILS.fullAddress}`,
     `DTSTART:${startUtc}`,
     `DTEND:${endUtc}`,
     "STATUS:CONFIRMED",
@@ -123,6 +133,17 @@ export default function InauguracaoPage() {
   const [erro, setErro] = useState<string | null>(null);
   const [confirmado, setConfirmado] = useState<{ nome: string; horario: string } | null>(null);
   const [showMap, setShowMap] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState(false);
+
+  async function handleCopyAddress() {
+    try {
+      await navigator.clipboard.writeText(EVENT_DETAILS.fullAddress);
+      setCopiedAddress(true);
+      setTimeout(() => setCopiedAddress(false), 2500);
+    } catch (err) {
+      console.error("Erro ao copiar endereço:", err);
+    }
+  }
 
   useEffect(() => {
     const unsubscribe = subscribeToEventSlots(
@@ -184,190 +205,202 @@ export default function InauguracaoPage() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <div className={styles.headerSection}>
-          <Image
-            className={styles.logo}
-            src="/brand/logo-floresca.png"
-            alt="Floresça - Saúde Integral Feminina"
-            width={88}
-            height={88}
-            priority
-          />
-          <div className={styles.tagline}>Espaço Floresça · Inauguração</div>
-          <h1>
-            Você é nossa <em>convidada especial</em>
-          </h1>
-          <p className={styles.subtitle}>
-            Um espaço acolhedor e integrativo, criado para cuidar da sua saúde,
-            beleza e bem-estar em todas as fases da vida.
-          </p>
-          <div className={styles.datePill}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-            <span>Sábado, 12 de Setembro</span>
-          </div>
-
-          <div className={styles.highlightsGrid}>
-            <div className={styles.highlightItem}>
-              <div className={styles.highlightIcon}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 22C12 22 4 17 4 10C4 5.58 7.58 2 12 2C16.42 2 20 5.58 20 10C20 17 12 22 12 22Z" />
-                  <path d="M12 22V8" />
-                  <path d="M12 13C9.5 11.5 7.5 12 7.5 12" />
-                  <path d="M12 17C14.5 15.5 16.5 16 16.5 16" />
-                </svg>
-              </div>
-              <div className={styles.highlightText}>
-                <strong>Visita Exclusiva</strong>
-                <span>Novas instalações & acolhimento</span>
-              </div>
-            </div>
-
-            <div className={styles.highlightItem}>
-              <div className={styles.highlightIcon}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                </svg>
-              </div>
-              <div className={styles.highlightText}>
-                <strong>Cuidado Integral</strong>
-                <span>Apresentação da metodologia</span>
-              </div>
-            </div>
-
-            <div className={styles.highlightItem}>
-              <div className={styles.highlightIcon}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 2v3M10 2v3M14 2v3" />
-                </svg>
-              </div>
-              <div className={styles.highlightText}>
-                <strong>Recepção Especial</strong>
-                <span>Degustação & bate-papo</span>
-              </div>
-            </div>
-
-            <div className={styles.highlightItem}>
-              <div className={styles.highlightIcon}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M12 7v5l3 2" />
-                </svg>
-              </div>
-              <div className={styles.highlightText}>
-                <strong>Vagas Limitadas</strong>
-                <span>Experiência intimista por horário</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {!confirmado ? (
-          <form onSubmit={handleSubmit} noValidate>
-            <div className={styles.formDivider}>Reserve seu Horário</div>
+          <>
+            <div className={styles.headerSection}>
+              <Image
+                className={styles.logo}
+                src="/brand/logo-floresca.png"
+                alt="Floresça - Saúde Integral Feminina"
+                width={88}
+                height={88}
+                priority
+              />
+              <div className={styles.tagline}>Espaço Floresça · Inauguração</div>
+              <h1>
+                Você é nossa <em>convidada especial</em>
+              </h1>
+              <p className={styles.subtitle}>
+                Um espaço acolhedor e integrativo, criado para cuidar da sua saúde,
+                beleza e bem-estar em todas as fases da vida.
+              </p>
+              <div className={styles.metaPillsRow}>
+                <div className={styles.datePill}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                  </svg>
+                  <span>Sábado, 12 de Setembro</span>
+                </div>
 
-            <label htmlFor="nome">Nome completo</label>
-            <input
-              type="text"
-              id="nome"
-              required
-              placeholder="Como prefere ser chamada?"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-            />
-
-            <label htmlFor="whatsapp">WhatsApp</label>
-            <input
-              type="tel"
-              id="whatsapp"
-              required
-              placeholder="(00) 00000-0000"
-              value={whatsapp}
-              onChange={(e) => setWhatsapp(formatWhatsapp(e.target.value))}
-            />
-
-            <label htmlFor="email">
-              E-mail <span className={styles.labelOptional}>(opcional)</span>
-            </label>
-            <input
-              type="email"
-              id="email"
-              placeholder="seuemail@exemplo.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-
-            <label htmlFor="dataNascimento">
-              Data de nascimento <span className={styles.labelOptional}>(opcional)</span>
-            </label>
-            <input
-              type="text"
-              id="dataNascimento"
-              placeholder="DD/MM/AAAA"
-              maxLength={10}
-              value={dataNascimento}
-              onChange={(e) => setDataNascimento(formatDate(e.target.value))}
-            />
-
-            <div className={styles.slotsHeader}>
-              <label>Escolha o melhor horário</label>
-              <span className={styles.slotsHelp}>Vagas limitadas</span>
-            </div>
-
-            {slotsError ? (
-              <div className={styles.loadingNote}>
-                Não foi possível carregar os horários — tente recarregar a página.
+                <div className={styles.locationPill}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  <span><strong>Edifício Golden Office</strong> · Sala 1108</span>
+                </div>
               </div>
-            ) : slots === null ? (
-              <div className={styles.loadingNote}>Carregando horários disponíveis...</div>
-            ) : null}
 
-            <div className={styles.slots}>
-              {displaySlots.map((s) => {
-                const capacity = s.capacity !== undefined ? s.capacity : 20;
-                const taken = s.taken ?? 0;
-                const remaining = capacity - taken;
-                const cheio = slots !== null && !slotsError && remaining <= 0;
-
-                return (
-                  <div
-                    key={s.horario}
-                    className={`${styles.slot} ${cheio ? styles.full : ""}`}
-                  >
-                    <input
-                      type="radio"
-                      name="horario"
-                      id={`h-${s.horario}`}
-                      value={s.horario}
-                      checked={horario === s.horario}
-                      disabled={cheio}
-                      onChange={() => setHorario(s.horario)}
-                    />
-                    <label htmlFor={`h-${s.horario}`}>
-                      <span>{s.horario}</span>
-                      {cheio ? (
-                        <small>Esgotado</small>
-                      ) : remaining <= 5 && slots !== null ? (
-                        <small>{remaining} {remaining === 1 ? "vaga" : "vagas"}</small>
-                      ) : (
-                        <small>Disponível</small>
-                      )}
-                    </label>
+              <div className={styles.highlightsGrid}>
+                <div className={styles.highlightItem}>
+                  <div className={styles.highlightIcon}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 22C12 22 4 17 4 10C4 5.58 7.58 2 12 2C16.42 2 20 5.58 20 10C20 17 12 22 12 22Z" />
+                      <path d="M12 22V8" />
+                      <path d="M12 13C9.5 11.5 7.5 12 7.5 12" />
+                      <path d="M12 17C14.5 15.5 16.5 16 16.5 16" />
+                    </svg>
                   </div>
-                );
-              })}
+                  <div className={styles.highlightText}>
+                    <strong>Visita Exclusiva</strong>
+                    <span>Novas instalações & acolhimento</span>
+                  </div>
+                </div>
+
+                <div className={styles.highlightItem}>
+                  <div className={styles.highlightIcon}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                  </div>
+                  <div className={styles.highlightText}>
+                    <strong>Cuidado Integral</strong>
+                    <span>Apresentação da metodologia</span>
+                  </div>
+                </div>
+
+                <div className={styles.highlightItem}>
+                  <div className={styles.highlightIcon}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 2v3M10 2v3M14 2v3" />
+                    </svg>
+                  </div>
+                  <div className={styles.highlightText}>
+                    <strong>Recepção Especial</strong>
+                    <span>Degustação & bate-papo</span>
+                  </div>
+                </div>
+
+                <div className={styles.highlightItem}>
+                  <div className={styles.highlightIcon}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="9" />
+                      <path d="M12 7v5l3 2" />
+                    </svg>
+                  </div>
+                  <div className={styles.highlightText}>
+                    <strong>Vagas Limitadas</strong>
+                    <span>Experiência intimista por horário</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <button type="submit" disabled={submitting}>
-              {submitting ? "Confirmando sua vaga..." : "Confirmar Minha Presença"}
-            </button>
+            <form onSubmit={handleSubmit} noValidate>
+              <div className={styles.formDivider}>Reserve seu Horário</div>
 
-            {erro && <div className={`${styles.msg} ${styles.msgError}`}>{erro}</div>}
-          </form>
+              <label htmlFor="nome">Nome completo</label>
+              <input
+                type="text"
+                id="nome"
+                required
+                placeholder="Como prefere ser chamada?"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+              />
+
+              <label htmlFor="whatsapp">WhatsApp</label>
+              <input
+                type="tel"
+                id="whatsapp"
+                required
+                placeholder="(00) 00000-0000"
+                value={whatsapp}
+                onChange={(e) => setWhatsapp(formatWhatsapp(e.target.value))}
+              />
+
+              <label htmlFor="email">
+                E-mail <span className={styles.labelOptional}>(opcional)</span>
+              </label>
+              <input
+                type="email"
+                id="email"
+                placeholder="seuemail@exemplo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+
+              <label htmlFor="dataNascimento">
+                Data de nascimento <span className={styles.labelOptional}>(opcional)</span>
+              </label>
+              <input
+                type="text"
+                id="dataNascimento"
+                placeholder="DD/MM/AAAA"
+                maxLength={10}
+                value={dataNascimento}
+                onChange={(e) => setDataNascimento(formatDate(e.target.value))}
+              />
+
+              <div className={styles.slotsHeader}>
+                <label>Escolha o melhor horário</label>
+                <span className={styles.slotsHelp}>Vagas limitadas</span>
+              </div>
+
+              {slotsError ? (
+                <div className={styles.loadingNote}>
+                  Não foi possível carregar os horários — tente recarregar a página.
+                </div>
+              ) : slots === null ? (
+                <div className={styles.loadingNote}>Carregando horários disponíveis...</div>
+              ) : null}
+
+              <div className={styles.slots}>
+                {displaySlots.map((s) => {
+                  const capacity = s.capacity !== undefined ? s.capacity : 20;
+                  const taken = s.taken ?? 0;
+                  const remaining = capacity - taken;
+                  const cheio = slots !== null && !slotsError && remaining <= 0;
+
+                  return (
+                    <div
+                      key={s.horario}
+                      className={`${styles.slot} ${cheio ? styles.full : ""}`}
+                    >
+                      <input
+                        type="radio"
+                        name="horario"
+                        id={`h-${s.horario}`}
+                        value={s.horario}
+                        checked={horario === s.horario}
+                        disabled={cheio}
+                        onChange={() => setHorario(s.horario)}
+                      />
+                      <label htmlFor={`h-${s.horario}`}>
+                        <span>{s.horario}</span>
+                        {cheio ? (
+                          <small>Esgotado</small>
+                        ) : remaining <= 5 && slots !== null ? (
+                          <small>{remaining} {remaining === 1 ? "vaga" : "vagas"}</small>
+                        ) : (
+                          <small>Disponível</small>
+                        )}
+                      </label>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <button type="submit" disabled={submitting}>
+                {submitting ? "Confirmando sua vaga..." : "Confirmar Minha Presença"}
+              </button>
+
+              {erro && <div className={`${styles.msg} ${styles.msgError}`}>{erro}</div>}
+            </form>
+          </>
         ) : (
           <div className={styles.successView}>
             <div className={styles.successIcon}>✓</div>
@@ -378,9 +411,43 @@ export default function InauguracaoPage() {
                 Horário reservado: {confirmado.horario}
               </div>
               <p>
-                Sua visita exclusiva no Espaço Floresça está garantida para{" "}
+                Sua visita exclusiva no Espaço Floresça está confirmada para{" "}
                 <strong>{EVENT_DETAILS.dateString}</strong>.
               </p>
+
+              {/* Endereço com botão de copiar */}
+              <div className={styles.confirmedAddressBox}>
+                <div className={styles.confirmedAddressInfo}>
+                  <div className={styles.buildingTag}>
+                    <span>📍</span>
+                    <strong>{EVENT_DETAILS.building} · {EVENT_DETAILS.room}</strong>
+                  </div>
+                  <div className={styles.fullStreetText}>
+                    {EVENT_DETAILS.street} — {EVENT_DETAILS.neighborhood}, {EVENT_DETAILS.city}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCopyAddress}
+                  className={`${styles.copyButton} ${copiedAddress ? styles.copyButtonActive : ""}`}
+                  title="Copiar endereço completo"
+                >
+                  {copiedAddress ? (
+                    <>
+                      <span>✓</span>
+                      <span>Copiado!</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                      </svg>
+                      <span>Copiar</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
             <p style={{ marginBottom: "20px" }}>
               Estamos preparando cada detalhe com muito carinho para receber você. Até breve! 🌷
@@ -436,13 +503,26 @@ export default function InauguracaoPage() {
               {showMap && (
                 <div className={styles.mapContent}>
                   <div className={styles.addressBox}>
-                    <strong>{EVENT_DETAILS.location}</strong>
-                    <p>{EVENT_DETAILS.address}</p>
+                    <div className={styles.addressBoxHeader}>
+                      <div>
+                        <strong>{EVENT_DETAILS.building} · {EVENT_DETAILS.room}</strong>
+                        <p>{EVENT_DETAILS.street} — {EVENT_DETAILS.neighborhood}</p>
+                        <p style={{ fontSize: "11.5px", color: "#8c786e" }}>{EVENT_DETAILS.city} · CEP {EVENT_DETAILS.cep}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleCopyAddress}
+                        className={`${styles.copyButtonMini} ${copiedAddress ? styles.copyButtonActive : ""}`}
+                        title="Copiar endereço completo"
+                      >
+                        {copiedAddress ? "Copiado! ✓" : "Copiar"}
+                      </button>
+                    </div>
                   </div>
 
                   <div className={styles.mapFrameWrapper}>
                     <iframe
-                      title="Localização do Espaço Floresça"
+                      title="Localização do Espaço Floresça no Edifício Golden Office"
                       src={EVENT_DETAILS.mapsEmbedSrc}
                       width="100%"
                       height="190"

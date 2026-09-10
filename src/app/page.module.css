@@ -95,20 +95,48 @@
   max-width: 90%;
 }
 
+.metaPillsRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 auto 20px;
+}
+
 .datePill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  margin: 0 auto 20px;
-  font-size: 13px;
+  margin: 0;
+  font-size: 12.5px;
   font-weight: 500;
   color: #936e25;
   background: #fdf7ec;
   border: 1px solid #f0e1c2;
   border-radius: 30px;
-  padding: 7px 18px;
+  padding: 6px 14px;
   box-shadow: 0 2px 6px rgba(201, 162, 75, 0.08);
+}
+
+.locationPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: 0;
+  font-size: 12px;
+  color: #63524b;
+  background: #fcf9f7;
+  border: 1px solid #ebdcd3;
+  border-radius: 30px;
+  padding: 6px 14px;
+}
+
+.locationPill strong {
+  color: #74896a;
+  font-weight: 600;
 }
 
 .highlightsGrid {
@@ -428,6 +456,101 @@
   margin-bottom: 12px;
 }
 
+.confirmedAddressBox {
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 1px solid #ebded6;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+}
+
+.confirmedAddressInfo {
+  flex: 1;
+}
+
+.buildingTag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: #74896a;
+  margin-bottom: 3px;
+}
+
+.buildingTag strong {
+  color: #4a3731;
+  font-weight: 600;
+}
+
+.fullStreetText {
+  display: block;
+  font-size: 11.5px;
+  color: #7a6860;
+  line-height: 1.35;
+}
+
+.copyButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 11px;
+  border-radius: 8px;
+  border: 1px solid #dfd0c6;
+  background: #fbf7f4;
+  color: #5c473f;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.copyButton:hover {
+  background: #f2e7df;
+  border-color: #c9b5a8;
+}
+
+.copyButtonActive {
+  background: #eef4ec !important;
+  border-color: #bcd2b6 !important;
+  color: #4c6843 !important;
+}
+
+.addressBoxHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.copyButtonMini {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 9px;
+  border-radius: 6px;
+  border: 1px solid #dfd0c6;
+  background: #fbf7f4;
+  color: #5c473f;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.copyButtonMini:hover {
+  background: #f2e7df;
+}
+
 .successView p {
   font-size: 14px;
   line-height: 1.6;
@@ -638,6 +761,31 @@
 
   .subtitle {
     font-size: 13.5px;
+  }
+
+  .metaPillsRow {
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .datePill,
+  .locationPill {
+    font-size: 11.5px;
+    padding: 5px 12px;
+    width: fit-content;
+  }
+
+  .confirmedAddressBox {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .copyButton {
+    width: 100%;
+    justify-content: center;
+    padding: 8px 12px;
   }
 
   .highlightsGrid {
