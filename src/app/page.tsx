@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./page.module.css";
@@ -17,21 +17,24 @@ const DEFAULT_SLOTS: Slot[] = [
   { horario: "17h30", capacity: 20, taken: 0, ordem: 3 },
 ];
 
+const CONFETTI_COLORS = ["#b07e76", "#74896a", "#d8b35a", "#d8919a", "#9e7bb5"];
+const CONFETTI_PIECES = Array.from({ length: 36 }, (_, index) => index);
+
 const EVENT_DETAILS = {
   title: "Inauguração · Espaço Floresça",
   description:
     "Visita exclusiva e inauguração do novo Espaço Floresça — Saúde Integral Feminina.",
   location: "Espaço Floresça",
-  building: "Edifício Golden Office",
+  building: "Golden Office",
   room: "Sala 1108",
   street: "Rua Cap. Cassiano Ricardo de Toledo, 191",
   neighborhood: "Chácara Urbana",
   city: "Jundiaí - SP",
   cep: "13201-840",
   fullAddress:
-    "Rua Cap. Cassiano Ricardo de Toledo, 191 - Sala 1108 (Edifício Golden Office) - Chácara Urbana, Jundiaí - SP, 13201-840",
+    "Rua Cap. Cassiano Ricardo de Toledo, 191 - Sala 1108 (Golden Office) - Chácara Urbana, Jundiaí - SP, 13201-840",
   shortAddress:
-    "Edifício Golden Office · Sala 1108 — Chácara Urbana, Jundiaí - SP",
+    "Golden Office · Sala 1108 — Chácara Urbana, Jundiaí - SP",
   dateString: "Sábado, 12 de Setembro",
   mapsEmbedSrc:
     "https://maps.google.com/maps?q=Rua%20Cap.%20Cassiano%20Ricardo%20de%20Toledo%2C%20191%20Jundia%C3%AD&t=&z=16&ie=UTF8&iwloc=&output=embed",
@@ -132,6 +135,7 @@ export default function InauguracaoPage() {
   const [submitting, setSubmitting] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [confirmado, setConfirmado] = useState<{ nome: string; horario: string } | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [copiedAddress, setCopiedAddress] = useState(false);
 
@@ -147,6 +151,7 @@ export default function InauguracaoPage() {
 
   function handleNewBooking() {
     setConfirmado(null);
+    setShowConfetti(false);
     setNome("");
     setWhatsapp("");
     setEmail("");
@@ -171,6 +176,19 @@ export default function InauguracaoPage() {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!confirmado) return;
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [confirmado]);
+
+  useEffect(() => {
+    if (!showConfetti) return;
+
+    const timeout = window.setTimeout(() => setShowConfetti(false), 4000);
+    return () => window.clearTimeout(timeout);
+  }, [showConfetti]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -220,6 +238,7 @@ export default function InauguracaoPage() {
     }
 
     setConfirmado({ nome: nomeLimpo, horario });
+    setShowConfetti(true);
     setSubmitting(false);
   }
 
@@ -227,10 +246,32 @@ export default function InauguracaoPage() {
 
   return (
     <div className={styles.page}>
+      {showConfetti && (
+        <div className={styles.confetti} aria-hidden="true">
+          {CONFETTI_PIECES.map((piece) => (
+            <span
+              key={piece}
+              className={styles.confettiPiece}
+              style={
+                {
+                  "--confetti-left": `${(piece * 37) % 101}%`,
+                  "--confetti-delay": `${(piece % 9) * 75}ms`,
+                  "--confetti-duration": `${2.6 + (piece % 5) * 0.18}s`,
+                  "--confetti-color": CONFETTI_COLORS[piece % CONFETTI_COLORS.length],
+                  "--confetti-drift": `${((piece * 29) % 141) - 70}px`,
+                  "--confetti-rotation": `${360 + (piece % 4) * 180}deg`,
+                  "--confetti-size": `${6 + (piece % 4)}px`,
+                } as CSSProperties
+              }
+            />
+          ))}
+        </div>
+      )}
       <div className={styles.card}>
         {!confirmado ? (
           <>
-            <div className={styles.headerSection}>
+            <div className={styles.formIntro}>
+              <div className={styles.headerSection}>
               <Image
                 className={`${styles.logo} ${styles.fadeStagger1}`}
                 src="/brand/logo-floresca.png"
@@ -265,7 +306,7 @@ export default function InauguracaoPage() {
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                     <circle cx="12" cy="10" r="3"></circle>
                   </svg>
-                  <span><strong>Edifício Golden Office</strong> · Sala 1108</span>
+                  <span><strong>Golden Office</strong> · Sala 1108</span>
                 </div>
               </div>
 
@@ -322,11 +363,13 @@ export default function InauguracaoPage() {
                   </div>
                 </div>
               </div>
+              <div className={`${styles.formDivider} ${styles.fadeStagger7}`}>
+                Reserve seu Horário
+              </div>
+              </div>
             </div>
 
             <form onSubmit={handleSubmit} noValidate className={styles.fadeStagger7}>
-              <div className={styles.formDivider}>Reserve seu Horário</div>
-
               <label htmlFor="nome">
                 Nome completo <span className={styles.requiredAsterisk}>*</span>
               </label>
@@ -555,7 +598,7 @@ export default function InauguracaoPage() {
 
                   <div className={styles.mapFrameWrapper}>
                     <iframe
-                      title="Localização do Espaço Floresça no Edifício Golden Office"
+                      title="Localização do Espaço Floresça no Golden Office"
                       src={EVENT_DETAILS.mapsEmbedSrc}
                       width="100%"
                       height="190"

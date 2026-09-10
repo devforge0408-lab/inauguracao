@@ -477,9 +477,9 @@ export default function AdminPage() {
         </div>
 
         {/* Stats Grid */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
+        <section className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-7">
           {/* Total Card */}
-          <div className="bg-white rounded-2xl p-5 border border-[#ede1d8] shadow-2xs relative overflow-hidden flex flex-col justify-between">
+          <div className="col-span-2 lg:col-span-1 bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-[#ede1d8] shadow-2xs relative overflow-hidden flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-serif uppercase tracking-wider text-[#8a7e78]">
@@ -520,45 +520,45 @@ export default function AdminPage() {
                 onClick={() =>
                   setSelectedHorario(selectedHorario === slot.horario ? "todos" : slot.horario)
                 }
-                className={`bg-white rounded-2xl p-5 border cursor-pointer transition-all hover:shadow-md relative group flex flex-col justify-between ${
+                className={`bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 border cursor-pointer transition-all hover:shadow-md relative group flex flex-col justify-between min-w-0 ${
                   selectedHorario === slot.horario
                     ? "border-[#74896a] ring-2 ring-[#74896a]/20"
                     : "border-[#ede1d8] hover:border-[#c99a93]"
                 }`}
               >
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-serif uppercase tracking-wider text-[#74896a] font-semibold">
+                  <div className="flex items-center justify-between gap-1 mb-2">
+                    <span className="min-w-0 truncate text-[10px] sm:text-xs font-serif uppercase tracking-wider text-[#74896a] font-semibold">
                       Horário {slot.horario}
                     </span>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex shrink-0 items-center gap-0.5 sm:gap-1.5">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleOpenEditSlot(slot);
                         }}
                         title="Ajustar quantidade de vagas deste horário"
-                        className="p-1 rounded-lg text-[#8a7e78] hover:text-[#453127] hover:bg-[#f3e9e3] transition-colors"
+                        className="p-0.5 sm:p-1 rounded-lg text-[#8a7e78] hover:text-[#453127] hover:bg-[#f3e9e3] transition-colors"
                       >
-                        <Settings2 className="w-3.5 h-3.5" />
+                        <Settings2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                       </button>
                       <div
-                        className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-serif ${
+                        className={`w-6 h-6 sm:w-7 sm:h-7 rounded-xl flex items-center justify-center text-xs font-serif ${
                           isFull
                             ? "bg-[#fef2f2] text-[#b0574e]"
                             : "bg-[#eef2e9] text-[#74896a]"
                         }`}
                       >
-                        <Clock className="w-3.5 h-3.5" />
+                        <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-baseline justify-between">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-serif font-bold text-[#453127]">
+                  <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+                    <div className="flex min-w-0 items-baseline gap-1 sm:gap-2">
+                      <span className="text-xl sm:text-2xl font-serif font-bold text-[#453127]">
                         {slot.count}
                       </span>
-                      <span className="text-xs text-[#8a7e78]">
+                      <span className="whitespace-nowrap text-[10px] sm:text-xs text-[#8a7e78]">
                         / {slot.capacity} vagas
                       </span>
                     </div>
@@ -567,14 +567,14 @@ export default function AdminPage() {
                         e.stopPropagation();
                         handleOpenEditSlot(slot);
                       }}
-                      className="text-[11px] text-[#74896a] hover:underline font-medium"
+                      className="self-end text-[10px] sm:text-[11px] text-[#74896a] hover:underline font-medium sm:self-auto"
                     >
                       Alterar vagas
                     </button>
                   </div>
                 </div>
 
-                <div className="mt-3">
+                <div className="mt-2 sm:mt-3">
                   <div className="w-full bg-[#f3e9e3] rounded-full h-2 overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
@@ -583,7 +583,7 @@ export default function AdminPage() {
                       style={{ width: `${slot.pct}%` }}
                     />
                   </div>
-                  <div className="flex justify-between items-center text-[11px] text-[#8a7e78] mt-1">
+                  <div className="flex justify-between items-center text-[10px] sm:text-[11px] text-[#8a7e78] mt-1">
                     <span className={isFull ? "text-[#b0574e] font-semibold" : "text-[#74896a]"}>
                       {isFull ? "Esgotado" : `${slot.vagasRestantes} livres`}
                     </span>
@@ -596,7 +596,7 @@ export default function AdminPage() {
         </section>
 
         {/* Toolbar: Search, Filters, CSV Export */}
-        <section className="bg-white rounded-2xl p-4 sm:p-5 border border-[#ede1d8] shadow-2xs mb-6">
+        <section className="bg-white rounded-2xl p-3 sm:p-5 border border-[#ede1d8] shadow-2xs mb-6">
           <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
             {/* Search Input */}
             <div className="relative flex-1">
@@ -619,8 +619,8 @@ export default function AdminPage() {
             </div>
 
             {/* Filter by Horário & Sort */}
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5">
-              <div className="relative flex-1 sm:flex-initial">
+            <div className="grid grid-cols-2 sm:flex sm:flex-nowrap items-center gap-2.5">
+              <div className="relative col-span-2 min-w-0 sm:flex-initial">
                 <select
                   value={selectedHorario}
                   onChange={(e) => setSelectedHorario(e.target.value)}
@@ -639,7 +639,7 @@ export default function AdminPage() {
                 <Filter className="w-3.5 h-3.5 text-[#b7aaa1] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
 
-              <div className="relative flex-1 sm:flex-initial">
+              <div className="relative col-span-2 min-w-0 sm:flex-initial">
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as "recent" | "oldest" | "name")}
@@ -656,14 +656,14 @@ export default function AdminPage() {
                 onClick={handleManualRefresh}
                 disabled={refreshing}
                 title="Recarregar dados"
-                className="p-2.5 rounded-xl border border-[#e4d5cc] bg-[#fdfaf8] hover:bg-[#f7f1ee] text-[#4a3f3a] transition-colors disabled:opacity-50 cursor-pointer"
+                className="w-full sm:w-auto p-2.5 rounded-xl border border-[#e4d5cc] bg-[#fdfaf8] hover:bg-[#f7f1ee] text-[#4a3f3a] transition-colors disabled:opacity-50 cursor-pointer flex items-center justify-center"
               >
                 <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin text-[#74896a]" : ""}`} />
               </button>
 
               <button
                 onClick={handleExportCSV}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#74896a] hover:bg-[#5e7256] text-white text-xs font-serif tracking-wide transition-all shadow-2xs hover:shadow cursor-pointer shrink-0"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-xl bg-[#74896a] hover:bg-[#5e7256] text-white text-xs font-serif tracking-wide transition-all shadow-2xs hover:shadow cursor-pointer shrink-0"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Exportar CSV</span>
@@ -673,7 +673,7 @@ export default function AdminPage() {
 
           {/* Active filter pills */}
           {(selectedHorario !== "todos" || searchTerm) && (
-            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[#f3e9e3] text-xs text-[#8a7e78]">
+            <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-[#f3e9e3] text-xs text-[#8a7e78]">
               <span>Filtros ativos:</span>
               {selectedHorario !== "todos" && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#eef2e9] text-[#74896a] font-medium text-[11px]">
@@ -696,7 +696,7 @@ export default function AdminPage() {
                   setSelectedHorario("todos");
                   setSearchTerm("");
                 }}
-                className="text-[11px] text-[#b0574e] underline ml-2 cursor-pointer"
+                className="text-[11px] text-[#b0574e] underline ml-0 sm:ml-2 cursor-pointer"
               >
                 Limpar todos
               </button>
@@ -706,8 +706,8 @@ export default function AdminPage() {
 
         {/* Responses Table */}
         <section className="bg-white rounded-2xl border border-[#ede1d8] shadow-2xs overflow-hidden">
-          <div className="px-5 py-4 border-b border-[#ede1d8] flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          <div className="px-4 sm:px-5 py-4 border-b border-[#ede1d8] flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
               <h2 className="font-serif text-base font-semibold text-[#453127]">
                 Lista de Confirmações
               </h2>
@@ -716,7 +716,7 @@ export default function AdminPage() {
               </span>
             </div>
 
-            <div className="text-xs text-[#8a7e78] flex items-center gap-1.5 font-medium">
+            <div className="whitespace-nowrap text-xs text-[#8a7e78] flex items-center gap-1.5 font-medium">
               <span className="w-2 h-2 rounded-full bg-[#34A853]"></span>
               Sincronização em tempo real
             </div>
@@ -742,8 +742,101 @@ export default function AdminPage() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+            <>
+              <div className="sm:hidden divide-y divide-[#f3e9e3]">
+                {filteredRsvps.map((rsvp) => {
+                  const rawDigits = normalizePhone(rsvp.whatsapp);
+                  const waLink = `https://wa.me/55${rawDigits}?text=${encodeURIComponent(
+                    `Olá ${rsvp.nome}! Estamos felizes em confirmar sua presença no evento de inauguração do Método Floresça no horário das ${rsvp.horario}. Até sábado!`
+                  )}`;
+
+                  return (
+                    <article key={rsvp.id} className="p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex min-w-0 items-start gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-[#b07e76]/15 text-[#b07e76] flex items-center justify-center font-serif text-xs font-bold shrink-0">
+                            {rsvp.nome.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <span className="block break-words text-sm font-semibold leading-tight text-[#453127]">
+                              {rsvp.nome}
+                            </span>
+                            <span className="block truncate text-[10px] text-[#8a7e78] font-mono">
+                              ID: {rsvp.id}
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setDeleteTarget(rsvp)}
+                          className="shrink-0 rounded-lg p-2 text-[#b0574e] hover:bg-[#fef2f2] transition-colors cursor-pointer"
+                          title="Cancelar/Excluir presença"
+                          aria-label={`Excluir confirmação de ${rsvp.nome}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <div className="col-span-2 flex min-w-0 items-center gap-1.5">
+                          <a
+                            href={waLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="min-w-0 flex-1 inline-flex items-center gap-1 rounded-lg bg-[#e7f8ee] px-2 py-1.5 text-[11px] font-medium text-[#25D366]"
+                            title="Abrir conversa no WhatsApp"
+                          >
+                            <Phone className="w-3 h-3 shrink-0" />
+                            <span className="truncate">{rsvp.whatsapp}</span>
+                          </a>
+                          <button
+                            onClick={() => handleCopyPhone(rsvp.whatsapp, rsvp.id)}
+                            className="shrink-0 rounded-lg p-1.5 text-[#b7aaa1] hover:bg-[#f7f1ee] hover:text-[#4a3f3a] cursor-pointer"
+                            title="Copiar número"
+                            aria-label="Copiar número de WhatsApp"
+                          >
+                            {copiedId === rsvp.id ? (
+                              <Check className="w-3.5 h-3.5 text-[#74896a]" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </div>
+
+                        {rsvp.email ? (
+                          <div className="col-span-2 flex min-w-0 items-center gap-1.5 text-[11px] text-[#6b5a53]">
+                            <Mail className="w-3 h-3 shrink-0 text-[#b7aaa1]" />
+                            <span className="truncate" title={rsvp.email}>
+                              {rsvp.email}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="col-span-2 flex items-center gap-1.5 text-[11px] italic text-[#c9bbb2]">
+                            <Mail className="w-3 h-3 shrink-0" />
+                            <span>E-mail não informado</span>
+                          </div>
+                        )}
+
+                        <div className="flex min-w-0 items-center gap-1 text-[11px] text-[#6b5a53]">
+                          <Calendar className="w-3 h-3 shrink-0 text-[#b7aaa1]" />
+                          <span className="truncate">
+                            {rsvp.data_nascimento || "Nascimento não informado"}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-end gap-1 text-[11px] text-[#74896a]">
+                          <Clock className="w-3 h-3 shrink-0" />
+                          <span className="whitespace-nowrap font-serif font-bold">{rsvp.horario}</span>
+                        </div>
+                        <div className="col-span-2 border-t border-[#f3e9e3] pt-2 text-[10px] text-[#8a7e78]">
+                          Enviado em {rsvp.created_at}
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+
+              <div className="hidden sm:block overflow-x-auto">
+                <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-[#fcf9f6] text-[#8a7e78] text-[11px] uppercase tracking-wider font-semibold border-b border-[#ede1d8]">
                     <th className="py-3 px-5">Convidado</th>
@@ -865,8 +958,9 @@ export default function AdminPage() {
                     );
                   })}
                 </tbody>
-              </table>
-            </div>
+                </table>
+              </div>
+            </>
           )}
         </section>
       </main>
