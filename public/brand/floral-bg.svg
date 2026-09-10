@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" fill="none" opacity="0.045">
+  <!-- Delicate floral background texture -->
+  <g stroke="#74896a" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Top right flower motif -->
+    <path d="M720,80 C680,40 620,60 620,110 C620,160 680,180 720,140 C760,180 820,160 820,110 C820,60 760,40 720,80 Z" />
+    <path d="M720,110 C700,90 670,100 670,125 C670,150 700,160 720,140" />
+    <path d="M720,140 C710,210 650,260 590,290" />
+    <path d="M640,210 C670,195 705,190 735,200" />
+    <path d="M605,255 C575,250 545,260 530,285" />
+    <path d="M720,80 Q730,30 750,10" />
+
+    <!-- Delicate branch left -->
+    <path d="M40,320 Q120,300 180,360 T260,450" />
+    <path d="M90,310 C105,280 135,275 150,295 C145,315 120,325 90,310 Z" />
+    <path d="M140,330 C160,310 185,315 195,335 C185,355 160,355 140,330 Z" />
+    <path d="M210,390 C235,370 260,380 265,405 C250,425 225,415 210,390 Z" />
+
+    <!-- Center organic petal wreath -->
+    <path d="M400,350 C380,320 340,325 345,365 C350,405 390,410 400,380 C410,410 450,405 455,365 C460,325 420,320 400,350 Z" />
+    <path d="M400,380 Q400,460 370,520" />
+    <path d="M385,440 C360,430 335,445 330,470 C350,480 375,465 385,440 Z" />
+    <path d="M380,480 C395,495 420,490 430,470 C420,455 395,460 380,480 Z" />
+
+    <!-- Bottom left floral curves -->
+    <path d="M80,720 C120,670 170,690 190,740 C150,770 100,760 80,720 Z" />
+    <path d="M135,705 Q220,680 310,720" />
+    <path d="M210,690 C220,660 250,655 265,675 C255,695 230,705 210,690 Z" />
+
+    <!-- Bottom right delicate sprig -->
+    <path d="M760,700 Q660,650 580,720" />
+    <path d="M690,665 C685,635 660,630 645,650 C650,670 675,680 690,665 Z" />
+    <path d="M630,685 C615,665 590,670 585,690 C600,705 620,700 630,685 Z" />
+  </g>
+  <g stroke="#b07e76" stroke-width="0.9" stroke-linecap="round" stroke-linejoin="round" opacity="0.8">
+    <!-- Rosé floral accents -->
+    <circle cx="720" cy="110" r="4" fill="#b07e76" fill-opacity="0.2" />
+    <circle cx="400" cy="365" r="3.5" fill="#b07e76" fill-opacity="0.2" />
+    <circle cx="135" cy="735" r="3" fill="#b07e76" fill-opacity="0.2" />
+    <path d="M720,110 m-12,0 a12,12 0 1,0 24,0 a12,12 0 1,0 -24,0" stroke-dasharray="2 3" />
+    <path d="M400,365 m-10,0 a10,10 0 1,0 20,0 a10,10 0 1,0 -20,0" stroke-dasharray="2 3" />
+  </g>
+</svg>

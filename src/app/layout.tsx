@@ -29,10 +29,11 @@ export const metadata: Metadata = {
     siteName: "Floresça",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Floresça - Saúde Integral Feminina",
+        type: "image/jpeg",
       },
     ],
     locale: "pt_BR",
@@ -43,7 +44,7 @@ export const metadata: Metadata = {
     title: "Floresça · Saúde Integral Feminina",
     description:
       "Confirme sua presença para a inauguração do espaço Floresça — Método Floresça.",
-    images: ["/og-image.png"],
+    images: ["/og-image.jpg"],
   },
   icons: {
     icon: "/brand/logo-floresca.png",

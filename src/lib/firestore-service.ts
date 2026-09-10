@@ -98,6 +98,74 @@ export async function getEventSlots(eventSlug: string = "inauguracao"): Promise<
 }
 
 /**
+ * Real-time listener for slots and capacities
+ */
+export function subscribeToEventSlots(
+  eventSlug: string = "inauguracao",
+  onUpdate: (slots: Slot[]) => void,
+  onError?: (error: Error) => void
+): Unsubscribe {
+  const slotsCol = collection(db, "events", eventSlug, "slots");
+  const q = query(slotsCol, orderBy("ordem", "asc"));
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      if (snapshot.empty) {
+        ensureDefaultSlots(eventSlug).then(onUpdate).catch(console.error);
+        return;
+      }
+      const list = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...(d.data() as Omit<Slot, "id">),
+      }));
+      onUpdate(list);
+    },
+    (err) => {
+      console.error("Firestore slots subscription error:", err);
+      if (onError) onError(err);
+    }
+  );
+}
+
+/**
+ * Updates slot capacity in Firestore
+ */
+export async function updateSlotCapacity(
+  eventSlug: string = "inauguracao",
+  slotIdOrHorario: string,
+  newCapacity: number
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const parsedCapacity = Number(newCapacity);
+    if (isNaN(parsedCapacity) || parsedCapacity < 0) {
+      return { success: false, error: "A capacidade deve ser um número maior ou igual a 0." };
+    }
+
+    const slotDocId = slotIdOrHorario.includes(":")
+      ? slotIdOrHorario.replace(":", "-")
+      : slotIdOrHorario;
+    const slotRef = doc(db, "events", eventSlug, "slots", slotDocId);
+
+    await setDoc(
+      slotRef,
+      {
+        capacity: parsedCapacity,
+      },
+      { merge: true }
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating slot capacity:", error);
+    return {
+      success: false,
+      error: "Não foi possível atualizar a capacidade.",
+    };
+  }
+}
+
+/**
  * Submits an RSVP using a Firestore transaction to prevent double-booking and duplicate numbers
  */
 export async function submitRsvp({

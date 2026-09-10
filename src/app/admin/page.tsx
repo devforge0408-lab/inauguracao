@@ -9,7 +9,9 @@ import {
   Rsvp,
   Slot,
   getEventSlots,
+  subscribeToEventSlots,
   subscribeToEventRsvps,
+  updateSlotCapacity,
   deleteRsvp,
   normalizePhone,
 } from "@/lib/firestore-service";
@@ -32,11 +34,15 @@ import {
   X,
   Copy,
   Check,
+  Settings2,
+  SlidersHorizontal,
+  Plus,
+  Minus,
 } from "lucide-react";
 
 const EVENT_SLUG = "inauguracao";
-const HORARIOS = ["15h30", "16h30", "17h30"];
-const CAPACITY_PER_SLOT = 20;
+const DEFAULT_HORARIOS = ["15h30", "16h30", "17h30"];
+const DEFAULT_CAPACITY = 20;
 
 export default function AdminPage() {
   const { user, loading, logout } = useAuth();
@@ -59,6 +65,13 @@ export default function AdminPage() {
   const [toastMsg, setToastMsg] = useState<{ text: string; type: "success" | "error" } | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  // Slot capacity management modal state
+  const [editingSlot, setEditingSlot] = useState<Slot | null>(null);
+  const [editCapacity, setEditCapacity] = useState<number>(20);
+  const [savingCapacity, setSavingCapacity] = useState(false);
+  const [showAllCapacitiesModal, setShowAllCapacitiesModal] = useState(false);
+  const [batchCapacities, setBatchCapacities] = useState<Record<string, number>>({});
+
   // Auth Guard
   useEffect(() => {
     if (!loading && !user) {
@@ -73,45 +86,47 @@ export default function AdminPage() {
     }, 4000);
   };
 
-  // Load slots data
-  const carregarSlots = async () => {
-    try {
-      const s = await getEventSlots(EVENT_SLUG);
-      setSlots(s);
-    } catch (err) {
-      console.error("Erro ao carregar slots:", err);
-    }
-  };
-
-  // Setup real-time listener for RSVPs
+  // Setup real-time listeners for RSVPs and Slots
   useEffect(() => {
     if (!user) return;
 
     setDataLoading(true);
-    void carregarSlots();
 
-    const unsubscribe = subscribeToEventRsvps(
+    const unsubSlots = subscribeToEventSlots(
+      EVENT_SLUG,
+      (slotsList) => {
+        setSlots(slotsList);
+      },
+      (err) => {
+        console.error("Erro ao escutar slots:", err);
+      }
+    );
+
+    const unsubRsvps = subscribeToEventRsvps(
       EVENT_SLUG,
       (list) => {
         setRsvps(list);
         setDataLoading(false);
-        void carregarSlots();
       },
       (err) => {
-        console.error("Erro na escuta em tempo real:", err);
+        console.error("Erro na escuta em tempo real de RSVPs:", err);
         setErrorMsg("Não foi possível carregar as respostas em tempo real.");
         setDataLoading(false);
       }
     );
 
-    return () => unsubscribe();
+    return () => {
+      unsubSlots();
+      unsubRsvps();
+    };
   }, [user]);
 
   const handleManualRefresh = async () => {
     setRefreshing(true);
     setErrorMsg(null);
     try {
-      await carregarSlots();
+      const s = await getEventSlots(EVENT_SLUG);
+      setSlots(s);
       showToast("Dados atualizados com sucesso!");
     } catch {
       setErrorMsg("Erro ao atualizar dados.");
@@ -137,7 +152,6 @@ export default function AdminPage() {
       if (res.success) {
         showToast(`Confirmação de ${deleteTarget.nome} foi removida.`);
         setDeleteTarget(null);
-        await carregarSlots();
       } else {
         showToast(res.error || "Erro ao excluir confirmação.", "error");
       }
@@ -146,6 +160,60 @@ export default function AdminPage() {
       showToast("Falha ao comunicar com o servidor.", "error");
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleOpenEditSlot = (slot: Slot) => {
+    setEditingSlot(slot);
+    setEditCapacity(slot.capacity ?? DEFAULT_CAPACITY);
+  };
+
+  const handleSaveSlotCapacity = async () => {
+    if (!editingSlot) return;
+    setSavingCapacity(true);
+    try {
+      const res = await updateSlotCapacity(
+        EVENT_SLUG,
+        editingSlot.id || editingSlot.horario,
+        editCapacity
+      );
+      if (res.success) {
+        showToast(`Vagas do horário ${editingSlot.horario} alteradas para ${editCapacity}!`);
+        setEditingSlot(null);
+      } else {
+        showToast(res.error || "Erro ao salvar capacidade.", "error");
+      }
+    } catch (err) {
+      console.error("Erro ao salvar capacidade:", err);
+      showToast("Erro ao conectar com o servidor.", "error");
+    } finally {
+      setSavingCapacity(false);
+    }
+  };
+
+  const handleOpenBatchModal = () => {
+    const initial: Record<string, number> = {};
+    const list = slots.length > 0 ? slots : DEFAULT_HORARIOS.map((h, i) => ({ horario: h, capacity: DEFAULT_CAPACITY, taken: 0, ordem: i + 1 }));
+    list.forEach((s) => {
+      initial[s.horario] = s.capacity ?? DEFAULT_CAPACITY;
+    });
+    setBatchCapacities(initial);
+    setShowAllCapacitiesModal(true);
+  };
+
+  const handleSaveBatchCapacities = async () => {
+    setSavingCapacity(true);
+    try {
+      for (const [horario, cap] of Object.entries(batchCapacities)) {
+        await updateSlotCapacity(EVENT_SLUG, horario, cap);
+      }
+      showToast("Todas as capacidades foram atualizadas com sucesso!");
+      setShowAllCapacitiesModal(false);
+    } catch (err) {
+      console.error("Erro ao salvar capacidades em lote:", err);
+      showToast("Erro ao salvar algumas capacidades.", "error");
+    } finally {
+      setSavingCapacity(false);
     }
   };
 
@@ -217,20 +285,37 @@ export default function AdminPage() {
     return list;
   }, [rsvps, selectedHorario, searchTerm, sortBy]);
 
-  // Statistics
+  // Dynamic slots list for display and calculations
+  const dynamicSlots = useMemo(() => {
+    if (slots && slots.length > 0) {
+      return slots;
+    }
+    return DEFAULT_HORARIOS.map((h, i) => ({
+      horario: h,
+      capacity: DEFAULT_CAPACITY,
+      taken: 0,
+      ordem: i + 1,
+    }));
+  }, [slots]);
+
+  // Statistics calculated dynamically from Firestore slots
   const stats = useMemo(() => {
     const totalConfirmados = rsvps.length;
-    const totalCapacidade = CAPACITY_PER_SLOT * HORARIOS.length;
-    const ocupacaoGeral = Math.min(100, Math.round((totalConfirmados / totalCapacidade) * 100));
+    const totalCapacidade = dynamicSlots.reduce(
+      (acc, s) => acc + (s.capacity !== undefined ? s.capacity : DEFAULT_CAPACITY),
+      0
+    );
+    const ocupacaoGeral = totalCapacidade > 0
+      ? Math.min(100, Math.round((totalConfirmados / totalCapacidade) * 100))
+      : 0;
 
-    const porHorario = HORARIOS.map((h) => {
-      const count = rsvps.filter((r) => r.horario === h).length;
-      const slotData = slots.find((s) => s.horario === h);
-      const capacity = slotData?.capacity || CAPACITY_PER_SLOT;
+    const porHorario = dynamicSlots.map((s) => {
+      const count = rsvps.filter((r) => r.horario === s.horario).length;
+      const capacity = s.capacity !== undefined ? s.capacity : DEFAULT_CAPACITY;
       const vagasRestantes = Math.max(0, capacity - count);
-      const pct = Math.min(100, Math.round((count / capacity) * 100));
+      const pct = capacity > 0 ? Math.min(100, Math.round((count / capacity) * 100)) : 100;
       return {
-        horario: h,
+        ...s,
         count,
         capacity,
         vagasRestantes,
@@ -239,7 +324,7 @@ export default function AdminPage() {
     });
 
     return { totalConfirmados, totalCapacidade, ocupacaoGeral, porHorario };
-  }, [rsvps, slots]);
+  }, [rsvps, dynamicSlots]);
 
   if (loading || (!user && loading)) {
     return (
@@ -261,7 +346,7 @@ export default function AdminPage() {
       {/* Toast notification */}
       {toastMsg && (
         <div
-          className={`fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg border text-sm font-medium transition-all animate-bounce duration-300 ${
+          className={`fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg border text-sm font-medium transition-all duration-300 ${
             toastMsg.type === "success"
               ? "bg-[#eef5eb] border-[#b9d9af] text-[#3b662e]"
               : "bg-[#fef2f2] border-[#fecaca] text-[#b0574e]"
@@ -317,6 +402,14 @@ export default function AdminPage() {
           </div>
 
           <div className="hidden sm:flex items-center gap-3">
+            <button
+              onClick={handleOpenBatchModal}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#74896a] hover:text-[#5e7256] bg-[#eef2e9] hover:bg-[#e4ebd9] rounded-lg transition-colors border border-[#d3e3cc] font-medium cursor-pointer"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span>Configurar Vagas</span>
+            </button>
+
             <Link
               href="/"
               target="_blank"
@@ -369,25 +462,41 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* Section Header with Quick Actions */}
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-serif text-sm font-semibold uppercase tracking-wider text-[#8a7e78]">
+            Ocupação & Horários
+          </h2>
+          <button
+            onClick={handleOpenBatchModal}
+            className="sm:hidden inline-flex items-center gap-1 text-xs text-[#74896a] font-medium bg-[#eef2e9] px-2.5 py-1 rounded-lg border border-[#d3e3cc]"
+          >
+            <SlidersHorizontal className="w-3 h-3" />
+            <span>Configurar Vagas</span>
+          </button>
+        </div>
+
         {/* Stats Grid */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
           {/* Total Card */}
-          <div className="bg-white rounded-2xl p-5 border border-[#ede1d8] shadow-2xs relative overflow-hidden">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-serif uppercase tracking-wider text-[#8a7e78]">
-                Total de Presenças
-              </span>
-              <div className="w-8 h-8 rounded-xl bg-[#b07e76]/10 text-[#b07e76] flex items-center justify-center">
-                <Users className="w-4 h-4" />
+          <div className="bg-white rounded-2xl p-5 border border-[#ede1d8] shadow-2xs relative overflow-hidden flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-serif uppercase tracking-wider text-[#8a7e78]">
+                  Total de Presenças
+                </span>
+                <div className="w-8 h-8 rounded-xl bg-[#b07e76]/10 text-[#b07e76] flex items-center justify-center">
+                  <Users className="w-4 h-4" />
+                </div>
               </div>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-serif font-bold text-[#453127]">
-                {stats.totalConfirmados}
-              </span>
-              <span className="text-xs text-[#8a7e78]">
-                de {stats.totalCapacidade} vagas
-              </span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-serif font-bold text-[#453127]">
+                  {stats.totalConfirmados}
+                </span>
+                <span className="text-xs text-[#8a7e78]">
+                  de {stats.totalCapacidade} vagas configuradas
+                </span>
+              </div>
             </div>
             <div className="mt-3">
               <div className="w-full bg-[#f3e9e3] rounded-full h-2 overflow-hidden">
@@ -397,7 +506,7 @@ export default function AdminPage() {
                 />
               </div>
               <p className="text-[11px] text-[#8a7e78] mt-1 text-right">
-                {stats.ocupacaoGeral}% preenchido
+                {stats.ocupacaoGeral}% ocupado
               </p>
             </div>
           </div>
@@ -411,34 +520,60 @@ export default function AdminPage() {
                 onClick={() =>
                   setSelectedHorario(selectedHorario === slot.horario ? "todos" : slot.horario)
                 }
-                className={`bg-white rounded-2xl p-5 border cursor-pointer transition-all hover:shadow-md ${
+                className={`bg-white rounded-2xl p-5 border cursor-pointer transition-all hover:shadow-md relative group flex flex-col justify-between ${
                   selectedHorario === slot.horario
                     ? "border-[#74896a] ring-2 ring-[#74896a]/20"
                     : "border-[#ede1d8] hover:border-[#c99a93]"
                 }`}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-serif uppercase tracking-wider text-[#74896a] font-semibold">
-                    Horário {slot.horario}
-                  </span>
-                  <div
-                    className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-serif ${
-                      isFull
-                        ? "bg-[#fef2f2] text-[#b0574e]"
-                        : "bg-[#eef2e9] text-[#74896a]"
-                    }`}
-                  >
-                    <Clock className="w-3.5 h-3.5" />
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-serif uppercase tracking-wider text-[#74896a] font-semibold">
+                      Horário {slot.horario}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenEditSlot(slot);
+                        }}
+                        title="Ajustar quantidade de vagas deste horário"
+                        className="p-1 rounded-lg text-[#8a7e78] hover:text-[#453127] hover:bg-[#f3e9e3] transition-colors"
+                      >
+                        <Settings2 className="w-3.5 h-3.5" />
+                      </button>
+                      <div
+                        className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-serif ${
+                          isFull
+                            ? "bg-[#fef2f2] text-[#b0574e]"
+                            : "bg-[#eef2e9] text-[#74896a]"
+                        }`}
+                      >
+                        <Clock className="w-3.5 h-3.5" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-baseline justify-between">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-serif font-bold text-[#453127]">
+                        {slot.count}
+                      </span>
+                      <span className="text-xs text-[#8a7e78]">
+                        / {slot.capacity} vagas
+                      </span>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenEditSlot(slot);
+                      }}
+                      className="text-[11px] text-[#74896a] hover:underline font-medium"
+                    >
+                      Alterar vagas
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-serif font-bold text-[#453127]">
-                    {slot.count}
-                  </span>
-                  <span className="text-xs text-[#8a7e78]">
-                    / {slot.capacity} confirmados
-                  </span>
-                </div>
+
                 <div className="mt-3">
                   <div className="w-full bg-[#f3e9e3] rounded-full h-2 overflow-hidden">
                     <div
@@ -450,7 +585,7 @@ export default function AdminPage() {
                   </div>
                   <div className="flex justify-between items-center text-[11px] text-[#8a7e78] mt-1">
                     <span className={isFull ? "text-[#b0574e] font-semibold" : "text-[#74896a]"}>
-                      {isFull ? "Esgotado" : `${slot.vagasRestantes} vagas livres`}
+                      {isFull ? "Esgotado" : `${slot.vagasRestantes} livres`}
                     </span>
                     <span>{slot.pct}%</span>
                   </div>
@@ -492,11 +627,11 @@ export default function AdminPage() {
                   className="w-full sm:w-auto appearance-none pl-3.5 pr-8 py-2.5 rounded-xl border border-[#e4d5cc] bg-[#fdfaf8] text-[#4a3f3a] text-xs font-medium focus:outline-none focus:border-[#c99a93] cursor-pointer"
                 >
                   <option value="todos">Todos os Horários ({rsvps.length})</option>
-                  {HORARIOS.map((h) => {
-                    const count = rsvps.filter((r) => r.horario === h).length;
+                  {dynamicSlots.map((s) => {
+                    const count = rsvps.filter((r) => r.horario === s.horario).length;
                     return (
-                      <option key={h} value={h}>
-                        {h} ({count})
+                      <option key={s.horario} value={s.horario}>
+                        {s.horario} ({count} / {s.capacity ?? DEFAULT_CAPACITY})
                       </option>
                     );
                   })}
@@ -561,7 +696,7 @@ export default function AdminPage() {
                   setSelectedHorario("todos");
                   setSearchTerm("");
                 }}
-                className="text-[11px] text-[#b0574e] underline ml-2"
+                className="text-[11px] text-[#b0574e] underline ml-2 cursor-pointer"
               >
                 Limpar todos
               </button>
@@ -569,7 +704,7 @@ export default function AdminPage() {
           )}
         </section>
 
-        {/* Responses Table / Card View */}
+        {/* Responses Table */}
         <section className="bg-white rounded-2xl border border-[#ede1d8] shadow-2xs overflow-hidden">
           <div className="px-5 py-4 border-b border-[#ede1d8] flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -664,7 +799,7 @@ export default function AdminPage() {
                             </a>
                             <button
                               onClick={() => handleCopyPhone(rsvp.whatsapp, rsvp.id)}
-                              className="p-1 text-[#b7aaa1] hover:text-[#4a3f3a] rounded"
+                              className="p-1 text-[#b7aaa1] hover:text-[#4a3f3a] rounded cursor-pointer"
                               title="Copiar número"
                             >
                               {copiedId === rsvp.id ? (
@@ -735,6 +870,246 @@ export default function AdminPage() {
           )}
         </section>
       </main>
+
+      {/* Single Slot Capacity Edit Modal */}
+      {editingSlot && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl border border-[#f0e1d9] animate-in fade-in zoom-in duration-200">
+            <div className="w-12 h-12 rounded-2xl bg-[#eef2e9] text-[#74896a] flex items-center justify-center mb-4 mx-auto">
+              <SlidersHorizontal className="w-6 h-6" />
+            </div>
+
+            <h3 className="font-serif text-lg text-center text-[#453127] font-semibold mb-1">
+              Definir Vagas · Horário {editingSlot.horario}
+            </h3>
+
+            <p className="text-xs text-[#8a7e78] text-center mb-5">
+              Atualmente existem{" "}
+              <strong className="text-[#453127]">
+                {rsvps.filter((r) => r.horario === editingSlot.horario).length} confirmações
+              </strong>{" "}
+              para este horário.
+            </p>
+
+            <div className="bg-[#fcf9f6] p-4 rounded-2xl border border-[#ede1d8] mb-5">
+              <label className="block text-xs font-serif text-[#8a7e78] uppercase tracking-wider mb-2 text-center">
+                Capacidade Total de Vagas
+              </label>
+
+              <div className="flex items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setEditCapacity((prev) => Math.max(0, prev - 1))}
+                  className="w-10 h-10 rounded-xl bg-white border border-[#e4d5cc] text-[#4a3f3a] hover:bg-[#f7f1ee] flex items-center justify-center cursor-pointer transition-colors"
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+
+                <input
+                  type="number"
+                  min="0"
+                  max="500"
+                  value={editCapacity}
+                  onChange={(e) => setEditCapacity(Math.max(0, parseInt(e.target.value) || 0))}
+                  className="w-24 text-center py-2 text-2xl font-serif font-bold text-[#453127] bg-white rounded-xl border border-[#e4d5cc] focus:outline-none focus:border-[#74896a]"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setEditCapacity((prev) => prev + 1)}
+                  className="w-10 h-10 rounded-xl bg-white border border-[#e4d5cc] text-[#4a3f3a] hover:bg-[#f7f1ee] flex items-center justify-center cursor-pointer transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Quick preset buttons */}
+              <div className="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-[#ede1d8]">
+                {[10, 15, 20, 25, 30].map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setEditCapacity(preset)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-serif transition-colors cursor-pointer ${
+                      editCapacity === preset
+                        ? "bg-[#74896a] text-white font-bold"
+                        : "bg-white border border-[#e4d5cc] text-[#8a7e78] hover:bg-[#f3e9e3]"
+                    }`}
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
+
+              {editCapacity < rsvps.filter((r) => r.horario === editingSlot.horario).length && (
+                <div className="mt-3 p-2.5 rounded-xl bg-[#fef2f2] text-[#b0574e] text-[11px] flex items-center gap-1.5">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>
+                    Atenção: A nova capacidade é menor que as presenças já confirmadas (
+                    {rsvps.filter((r) => r.horario === editingSlot.horario).length}).
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setEditingSlot(null)}
+                disabled={savingCapacity}
+                className="flex-1 py-2.5 px-4 rounded-xl border border-[#e4d5cc] text-[#4a3f3a] text-xs font-medium hover:bg-[#f7f1ee] transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveSlotCapacity}
+                disabled={savingCapacity}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-[#74896a] hover:bg-[#5e7256] text-white text-xs font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+              >
+                {savingCapacity ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Salvando...</span>
+                  </>
+                ) : (
+                  "Salvar Vagas"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Batch Configure All Slots Modal */}
+      {showAllCapacitiesModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-lg w-full shadow-2xl border border-[#f0e1d9] animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#eef2e9] text-[#74896a] flex items-center justify-center">
+                  <SlidersHorizontal className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-lg text-[#453127] font-semibold">
+                    Configuração de Vagas
+                  </h3>
+                  <p className="text-xs text-[#8a7e78]">
+                    Defina a capacidade máxima de cada horário do evento
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAllCapacitiesModal(false)}
+                className="text-[#8a7e78] hover:text-[#453127] p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 mb-6 max-h-[60vh] overflow-y-auto pr-1">
+              {dynamicSlots.map((s) => {
+                const count = rsvps.filter((r) => r.horario === s.horario).length;
+                const currentVal = batchCapacities[s.horario] ?? (s.capacity ?? DEFAULT_CAPACITY);
+                const isUnderCount = currentVal < count;
+
+                return (
+                  <div
+                    key={s.horario}
+                    className="p-4 rounded-2xl bg-[#fcf9f6] border border-[#ede1d8] flex items-center justify-between gap-4"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-serif font-bold text-sm text-[#453127]">
+                          {s.horario}
+                        </span>
+                        <span className="text-[11px] text-[#74896a] bg-[#eef2e9] px-2 py-0.5 rounded-full font-medium">
+                          {count} confirmados
+                        </span>
+                      </div>
+                      {isUnderCount && (
+                        <p className="text-[10px] text-[#b0574e] mt-1">
+                          Capacidade menor que os confirmados atuais
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setBatchCapacities((prev) => ({
+                            ...prev,
+                            [s.horario]: Math.max(0, (prev[s.horario] ?? currentVal) - 1),
+                          }))
+                        }
+                        className="w-8 h-8 rounded-lg bg-white border border-[#e4d5cc] text-[#4a3f3a] hover:bg-[#f7f1ee] flex items-center justify-center cursor-pointer"
+                      >
+                        <Minus className="w-3.5 h-3.5" />
+                      </button>
+
+                      <input
+                        type="number"
+                        min="0"
+                        value={currentVal}
+                        onChange={(e) => {
+                          const val = Math.max(0, parseInt(e.target.value) || 0);
+                          setBatchCapacities((prev) => ({
+                            ...prev,
+                            [s.horario]: val,
+                          }));
+                        }}
+                        className="w-16 text-center py-1.5 text-base font-serif font-bold text-[#453127] bg-white rounded-lg border border-[#e4d5cc] focus:outline-none focus:border-[#74896a]"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setBatchCapacities((prev) => ({
+                            ...prev,
+                            [s.horario]: (prev[s.horario] ?? currentVal) + 1,
+                          }))
+                        }
+                        className="w-8 h-8 rounded-lg bg-white border border-[#e4d5cc] text-[#4a3f3a] hover:bg-[#f7f1ee] flex items-center justify-center cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setShowAllCapacitiesModal(false)}
+                disabled={savingCapacity}
+                className="flex-1 py-2.5 px-4 rounded-xl border border-[#e4d5cc] text-[#4a3f3a] text-xs font-medium hover:bg-[#f7f1ee] transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveBatchCapacities}
+                disabled={savingCapacity}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-[#74896a] hover:bg-[#5e7256] text-white text-xs font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+              >
+                {savingCapacity ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Salvando...</span>
+                  </>
+                ) : (
+                  "Salvar Todas as Vagas"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {deleteTarget && (
