@@ -31,6 +31,7 @@ cp .env.example .env.local
 ```
 Preencha as variáveis em `.env.local`:
 ```env
+NEXT_PUBLIC_SITE_URL=https://convite.florescasaudefeminina.com.br
 NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSy...
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=seu-projeto.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=seu-projeto
@@ -67,7 +68,7 @@ O projeto já inclui o arquivo `apphosting.yaml` e `firebase.json` configurados 
    firebase apphosting:backends:create
    ```
 3. Ou conecte seu repositório GitHub diretamente pelo Console do Firebase em **Build > App Hosting**.
-4. Configure as variáveis de ambiente no console do Firebase / App Hosting Secrets.
+4. Configure as variáveis de ambiente no console do Firebase / App Hosting Secrets. A variável pública `NEXT_PUBLIC_SITE_URL` deve permanecer disponível durante o **BUILD** e em **RUNTIME**, pois o Next.js gera as tags Open Graph no HTML da página.
 
 ---
 

@@ -16,8 +16,12 @@ const display = Cormorant_Garamond({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://devforge-ti.web.app"
+    process.env.NEXT_PUBLIC_SITE_URL ||
+      "https://convite.florescasaudefeminina.com.br"
   ),
+  alternates: {
+    canonical: "/",
+  },
   title: "Floresça · Saúde Integral Feminina",
   description:
     "Confirmação de presença para a inauguração do espaço Floresça — Método Floresça.",

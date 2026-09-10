@@ -145,6 +145,17 @@ export default function InauguracaoPage() {
     }
   }
 
+  function handleNewBooking() {
+    setConfirmado(null);
+    setNome("");
+    setWhatsapp("");
+    setEmail("");
+    setDataNascimento("");
+    setHorario(null);
+    setErro(null);
+    setShowMap(false);
+  }
+
   useEffect(() => {
     const unsubscribe = subscribeToEventSlots(
       EVENT_SLUG,
@@ -170,12 +181,24 @@ export default function InauguracaoPage() {
     const emailLimpo = email.trim();
     const dataNascimentoLimpa = dataNascimento.trim();
 
-    if (!nomeLimpo || !whatsappLimpo) {
-      setErro("Por favor, preencha nome e WhatsApp.");
+    if (!nomeLimpo) {
+      setErro("Por favor, informe seu nome completo.");
+      return;
+    }
+    if (!whatsappLimpo || whatsappLimpo.replace(/\D/g, "").length < 10) {
+      setErro("Por favor, informe um WhatsApp válido com DDD.");
+      return;
+    }
+    if (!emailLimpo || !emailLimpo.includes("@") || !emailLimpo.includes(".")) {
+      setErro("Por favor, informe um e-mail válido.");
+      return;
+    }
+    if (!dataNascimentoLimpa || dataNascimentoLimpa.length < 10) {
+      setErro("Por favor, informe sua data de nascimento (DD/MM/AAAA).");
       return;
     }
     if (!horario) {
-      setErro("Por favor, escolha um horário.");
+      setErro("Por favor, escolha um horário para a sua visita.");
       return;
     }
 
@@ -209,22 +232,24 @@ export default function InauguracaoPage() {
           <>
             <div className={styles.headerSection}>
               <Image
-                className={styles.logo}
+                className={`${styles.logo} ${styles.fadeStagger1}`}
                 src="/brand/logo-floresca.png"
                 alt="Floresça - Saúde Integral Feminina"
                 width={88}
                 height={88}
                 priority
               />
-              <div className={styles.tagline}>Espaço Floresça · Inauguração</div>
-              <h1>
+              <div className={`${styles.tagline} ${styles.fadeStagger2}`}>
+                Espaço Floresça · Inauguração
+              </div>
+              <h1 className={styles.fadeStagger3}>
                 Você é nossa <em>convidada especial</em>
               </h1>
-              <p className={styles.subtitle}>
+              <p className={`${styles.subtitle} ${styles.fadeStagger4}`}>
                 Um espaço acolhedor e integrativo, criado para cuidar da sua saúde,
                 beleza e bem-estar em todas as fases da vida.
               </p>
-              <div className={styles.metaPillsRow}>
+              <div className={`${styles.metaPillsRow} ${styles.fadeStagger5}`}>
                 <div className={styles.datePill}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -244,7 +269,7 @@ export default function InauguracaoPage() {
                 </div>
               </div>
 
-              <div className={styles.highlightsGrid}>
+              <div className={`${styles.highlightsGrid} ${styles.fadeStagger6}`}>
                 <div className={styles.highlightItem}>
                   <div className={styles.highlightIcon}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -299,10 +324,12 @@ export default function InauguracaoPage() {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} noValidate>
+            <form onSubmit={handleSubmit} noValidate className={styles.fadeStagger7}>
               <div className={styles.formDivider}>Reserve seu Horário</div>
 
-              <label htmlFor="nome">Nome completo</label>
+              <label htmlFor="nome">
+                Nome completo <span className={styles.requiredAsterisk}>*</span>
+              </label>
               <input
                 type="text"
                 id="nome"
@@ -312,7 +339,9 @@ export default function InauguracaoPage() {
                 onChange={(e) => setNome(e.target.value)}
               />
 
-              <label htmlFor="whatsapp">WhatsApp</label>
+              <label htmlFor="whatsapp">
+                WhatsApp <span className={styles.requiredAsterisk}>*</span>
+              </label>
               <input
                 type="tel"
                 id="whatsapp"
@@ -323,22 +352,24 @@ export default function InauguracaoPage() {
               />
 
               <label htmlFor="email">
-                E-mail <span className={styles.labelOptional}>(opcional)</span>
+                E-mail <span className={styles.requiredAsterisk}>*</span>
               </label>
               <input
                 type="email"
                 id="email"
+                required
                 placeholder="seuemail@exemplo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
 
               <label htmlFor="dataNascimento">
-                Data de nascimento <span className={styles.labelOptional}>(opcional)</span>
+                Data de nascimento <span className={styles.requiredAsterisk}>*</span>
               </label>
               <input
                 type="text"
                 id="dataNascimento"
+                required
                 placeholder="DD/MM/AAAA"
                 maxLength={10}
                 value={dataNascimento}
@@ -346,7 +377,9 @@ export default function InauguracaoPage() {
               />
 
               <div className={styles.slotsHeader}>
-                <label>Escolha o melhor horário</label>
+                <label>
+                  Escolha o melhor horário <span className={styles.requiredAsterisk}>*</span>
+                </label>
                 <span className={styles.slotsHelp}>Vagas limitadas</span>
               </div>
 
@@ -553,6 +586,26 @@ export default function InauguracaoPage() {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Ação para inscrever outra pessoa */}
+            <div className={styles.newBookingSection}>
+              <button
+                type="button"
+                onClick={handleNewBooking}
+                className={styles.newBookingButton}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="8.5" cy="7" r="4" />
+                  <line x1="20" y1="8" x2="20" y2="14" />
+                  <line x1="23" y1="11" x2="17" y2="11" />
+                </svg>
+                <span>Inscrever outra convidada</span>
+              </button>
+              <p className={styles.newBookingHelp}>
+                Deseja reservar a vaga de uma amiga ou acompanhante? Toque acima para cadastrá-la.
+              </p>
             </div>
           </div>
         )}

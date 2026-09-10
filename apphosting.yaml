@@ -10,6 +10,11 @@ runConfig:
 
 # Environment variables for App Hosting runtime
 env:
+  - variable: NEXT_PUBLIC_SITE_URL
+    value: https://convite.florescasaudefeminina.com.br
+    availability:
+      - BUILD
+      - RUNTIME
   - variable: NEXT_PUBLIC_FIREBASE_API_KEY
     value: AIzaSyDl1OoskVpG7UFTP5kaLxpr5ubL-wwCMEY
     availability:
