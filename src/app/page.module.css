@@ -67,7 +67,8 @@
 }
 
 .card input[type="text"],
-.card input[type="tel"] {
+.card input[type="tel"],
+.card input[type="email"] {
   width: 100%;
   padding: 11px 14px;
   border-radius: 10px;
@@ -76,10 +77,12 @@
   font-size: 15px;
   background: #fdfaf8;
   color: #4a3f3a;
+  box-sizing: border-box;
 }
 
 .card input[type="text"]:focus,
-.card input[type="tel"]:focus {
+.card input[type="tel"]:focus,
+.card input[type="email"]:focus {
   outline: none;
   border-color: #c99a93;
 }

@@ -23,6 +23,8 @@ export type Rsvp = {
   id: string;
   nome: string;
   whatsapp: string;
+  email?: string;
+  data_nascimento?: string;
   horario: string;
   created_at: string;
 };
@@ -100,11 +102,15 @@ export async function submitRsvp({
   eventSlug = "inauguracao",
   nome,
   whatsapp,
+  email,
+  dataNascimento,
   horario,
 }: {
   eventSlug?: string;
   nome: string;
   whatsapp: string;
+  email?: string;
+  dataNascimento?: string;
   horario: string;
 }): Promise<{ success: boolean; error?: string }> {
   const digits = normalizePhone(whatsapp);
@@ -150,6 +156,8 @@ export async function submitRsvp({
         nome,
         whatsapp,
         digits,
+        email: email || "",
+        data_nascimento: dataNascimento || "",
         horario,
         created_at: serverTimestamp(),
       });
@@ -197,6 +205,8 @@ export async function getEventRsvps(eventSlug: string = "inauguracao"): Promise<
         id: d.id,
         nome: data.nome,
         whatsapp: data.whatsapp,
+        email: data.email || "",
+        data_nascimento: data.data_nascimento || "",
         horario: data.horario,
         created_at: created_at_str,
       };

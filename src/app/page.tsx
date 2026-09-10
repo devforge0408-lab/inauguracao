@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import styles from "./page.module.css";
 import {
   Slot,
@@ -23,12 +24,21 @@ function formatWhatsapp(raw: string): string {
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
 }
 
+function formatDate(raw: string): string {
+  const digits = raw.replace(/\D/g, "").slice(0, 8);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}
+
 export default function InauguracaoPage() {
   const [slots, setSlots] = useState<Slot[] | null>(null);
   const [slotsError, setSlotsError] = useState(false);
 
   const [nome, setNome] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
+  const [email, setEmail] = useState("");
+  const [dataNascimento, setDataNascimento] = useState("");
   const [horario, setHorario] = useState<string | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
@@ -62,6 +72,8 @@ export default function InauguracaoPage() {
 
     const nomeLimpo = nome.trim();
     const whatsappLimpo = whatsapp.trim();
+    const emailLimpo = email.trim();
+    const dataNascimentoLimpa = dataNascimento.trim();
 
     if (!nomeLimpo || !whatsappLimpo) {
       setErro("Por favor, preencha nome e WhatsApp.");
@@ -78,6 +90,8 @@ export default function InauguracaoPage() {
       eventSlug: EVENT_SLUG,
       nome: nomeLimpo,
       whatsapp: whatsappLimpo,
+      email: emailLimpo,
+      dataNascimento: dataNascimentoLimpa,
       horario,
     });
 
@@ -115,7 +129,14 @@ export default function InauguracaoPage() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <img className={styles.logo} src="/brand/logo-floresca.png" alt="Floresça" />
+        <Image
+          className={styles.logo}
+          src="/brand/logo-floresca.png"
+          alt="Floresça"
+          width={84}
+          height={84}
+          priority
+        />
 
         <h1>Boas-vindas ao nosso espaço</h1>
         <div className={styles.subtitle}>Método Floresça</div>
@@ -141,6 +162,25 @@ export default function InauguracaoPage() {
               placeholder="(00) 00000-0000"
               value={whatsapp}
               onChange={(e) => setWhatsapp(formatWhatsapp(e.target.value))}
+            />
+
+            <label htmlFor="email">E-mail</label>
+            <input
+              type="email"
+              id="email"
+              placeholder="seuemail@exemplo.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+
+            <label htmlFor="dataNascimento">Data de nascimento</label>
+            <input
+              type="text"
+              id="dataNascimento"
+              placeholder="DD/MM/AAAA"
+              maxLength={10}
+              value={dataNascimento}
+              onChange={(e) => setDataNascimento(formatDate(e.target.value))}
             />
 
             <label>
@@ -197,7 +237,13 @@ export default function InauguracaoPage() {
           </form>
         ) : (
           <div className={styles.successView}>
-            <img className={styles.logo} src="/brand/logo-floresca.png" alt="Floresça" />
+            <Image
+              className={styles.logo}
+              src="/brand/logo-floresca.png"
+              alt="Floresça"
+              width={90}
+              height={90}
+            />
             <h2>Presença confirmada!</h2>
             <p>
               {confirmado.nome}, sua vaga para as {confirmado.horario} está garantida. Até
@@ -223,10 +269,15 @@ export default function InauguracaoPage() {
               <>
                 {adminLista.map((r) => (
                   <div key={r.id} className={styles.adminRow}>
-                    <span>
-                      {r.nome} — {r.whatsapp}
-                    </span>
-                    <span>{r.horario}</span>
+                    <div>
+                      <div><strong>{r.nome}</strong></div>
+                      <div style={{ fontSize: "11px", color: "#8a7e78", marginTop: "2px" }}>
+                        {r.whatsapp}
+                        {r.email ? ` · ${r.email}` : ""}
+                        {r.data_nascimento ? ` · Nasc: ${r.data_nascimento}` : ""}
+                      </div>
+                    </div>
+                    <span style={{ fontWeight: "bold", color: "#74896a" }}>{r.horario}</span>
                   </div>
                 ))}
                 <div className={styles.adminTotal}>
@@ -241,7 +292,7 @@ export default function InauguracaoPage() {
         )}
 
         <div className={styles.disclaimer}>
-          Suas informações (nome, WhatsApp e horário) ficam visíveis para a equipe Floresça
+          Suas informações (nome, WhatsApp, e-mail, data de nascimento e horário) ficam visíveis para a equipe Floresça
           responsável pela organização do evento.
         </div>
       </div>
