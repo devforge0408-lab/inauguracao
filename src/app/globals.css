@@ -15,3 +15,7 @@ body {
   color: #453127;
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
+
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+}
