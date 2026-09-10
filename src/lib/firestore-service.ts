@@ -8,6 +8,8 @@ import {
   runTransaction,
   serverTimestamp,
   Timestamp,
+  onSnapshot,
+  Unsubscribe,
 } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -192,7 +194,7 @@ export async function submitRsvp({
 export async function getEventRsvps(eventSlug: string = "inauguracao"): Promise<Rsvp[]> {
   try {
     const rsvpsCol = collection(db, "events", eventSlug, "rsvps");
-    const q = query(rsvpsCol, orderBy("created_at", "asc"));
+    const q = query(rsvpsCol, orderBy("created_at", "desc"));
     const snapshot = await getDocs(q);
 
     return snapshot.docs.map((d) => {
@@ -214,5 +216,91 @@ export async function getEventRsvps(eventSlug: string = "inauguracao"): Promise<
   } catch (err) {
     console.error("Error fetching team RSVPs:", err);
     throw err;
+  }
+}
+
+/**
+ * Real-time listener for RSVPs
+ */
+export function subscribeToEventRsvps(
+  eventSlug: string = "inauguracao",
+  onUpdate: (rsvps: Rsvp[]) => void,
+  onError?: (error: Error) => void
+): Unsubscribe {
+  const rsvpsCol = collection(db, "events", eventSlug, "rsvps");
+  const q = query(rsvpsCol, orderBy("created_at", "desc"));
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const list = snapshot.docs.map((d) => {
+        const data = d.data();
+        let created_at_str = "";
+        if (data.created_at instanceof Timestamp) {
+          created_at_str = data.created_at.toDate().toLocaleString("pt-BR");
+        } else if (data.created_at) {
+          created_at_str = String(data.created_at);
+        }
+        return {
+          id: d.id,
+          nome: data.nome || "",
+          whatsapp: data.whatsapp || "",
+          email: data.email || "",
+          data_nascimento: data.data_nascimento || "",
+          horario: data.horario || "",
+          created_at: created_at_str,
+        };
+      });
+      onUpdate(list);
+    },
+    (err) => {
+      console.error("Firestore RSVP subscription error:", err);
+      if (onError) onError(err);
+    }
+  );
+}
+
+/**
+ * Deletes an RSVP and decrements the slot counter
+ */
+export async function deleteRsvp(
+  eventSlug: string = "inauguracao",
+  rsvpId: string,
+  horario?: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const rsvpDocRef = doc(db, "events", eventSlug, "rsvps", rsvpId);
+
+    await runTransaction(db, async (transaction) => {
+      const rsvpDoc = await transaction.get(rsvpDocRef);
+      if (!rsvpDoc.exists()) {
+        return;
+      }
+      const data = rsvpDoc.data();
+      const targetHorario = horario || data?.horario;
+
+      if (targetHorario) {
+        const slotDocId = targetHorario.replace(":", "-");
+        const slotRef = doc(db, "events", eventSlug, "slots", slotDocId);
+        const slotDoc = await transaction.get(slotRef);
+        if (slotDoc.exists()) {
+          const slotData = slotDoc.data() as Slot;
+          const currentTaken = slotData.taken || 0;
+          transaction.update(slotRef, {
+            taken: Math.max(0, currentTaken - 1),
+          });
+        }
+      }
+
+      transaction.delete(rsvpDocRef);
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting RSVP:", error);
+    return {
+      success: false,
+      error: "Não foi possível excluir a confirmação.",
+    };
   }
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const sans = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -30,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={`${sans.variable} ${display.variable} font-sans antialiased`}>
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

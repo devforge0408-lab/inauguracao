@@ -8,9 +8,10 @@ service cloud.firestore {
       allow write: if true;
     }
 
-    // Event RSVPs: anyone can create their RSVP, reading list can be public or restricted to auth
+    // Event RSVPs: only authenticated users can list all RSVPs; public can check a specific phone and create
     match /events/{eventSlug}/rsvps/{rsvpId} {
-      allow read: if true;
+      allow get: if true;
+      allow list: if request.auth != null;
       allow create: if request.resource.data.nome is string
                     && request.resource.data.whatsapp is string
                     && request.resource.data.horario is string;

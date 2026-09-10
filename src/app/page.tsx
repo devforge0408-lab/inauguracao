@@ -2,13 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import styles from "./page.module.css";
 import {
   Slot,
-  Rsvp,
   getEventSlots,
   submitRsvp,
-  getEventRsvps,
 } from "@/lib/firestore-service";
 
 const EVENT_SLUG = "inauguracao";
@@ -44,11 +43,6 @@ export default function InauguracaoPage() {
   const [submitting, setSubmitting] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [confirmado, setConfirmado] = useState<{ nome: string; horario: string } | null>(null);
-
-  const [adminAberto, setAdminAberto] = useState(false);
-  const [adminCarregando, setAdminCarregando] = useState(false);
-  const [adminLista, setAdminLista] = useState<Rsvp[] | null>(null);
-  const [adminErro, setAdminErro] = useState(false);
 
   const carregarVagas = useCallback(async () => {
     try {
@@ -104,26 +98,6 @@ export default function InauguracaoPage() {
 
     setConfirmado({ nome: nomeLimpo, horario });
     setSubmitting(false);
-  }
-
-  async function alternarAdmin() {
-    const abrindo = !adminAberto;
-    setAdminAberto(abrindo);
-    if (!abrindo) return;
-
-    setAdminCarregando(true);
-    setAdminErro(false);
-
-    try {
-      const rows = await getEventRsvps(EVENT_SLUG);
-      setAdminLista(rows);
-      await carregarVagas();
-    } catch {
-      setAdminErro(true);
-      setAdminLista(null);
-    } finally {
-      setAdminCarregando(false);
-    }
   }
 
   return (
@@ -252,48 +226,25 @@ export default function InauguracaoPage() {
           </div>
         )}
 
-        <button type="button" className={styles.adminToggle} onClick={alternarAdmin}>
-          {adminAberto ? "ocultar confirmações" : "ver confirmações (equipe)"}
-        </button>
-
-        {adminAberto && (
-          <div className={styles.adminPanel}>
-            <h3>Confirmações recebidas</h3>
-            {adminCarregando ? (
-              <div>Carregando...</div>
-            ) : adminErro || adminLista === null ? (
-              <div>Ainda não há confirmações.</div>
-            ) : adminLista.length === 0 ? (
-              <div>Nenhuma confirmação ainda.</div>
-            ) : (
-              <>
-                {adminLista.map((r) => (
-                  <div key={r.id} className={styles.adminRow}>
-                    <div>
-                      <div><strong>{r.nome}</strong></div>
-                      <div style={{ fontSize: "11px", color: "#8a7e78", marginTop: "2px" }}>
-                        {r.whatsapp}
-                        {r.email ? ` · ${r.email}` : ""}
-                        {r.data_nascimento ? ` · Nasc: ${r.data_nascimento}` : ""}
-                      </div>
-                    </div>
-                    <span style={{ fontWeight: "bold", color: "#74896a" }}>{r.horario}</span>
-                  </div>
-                ))}
-                <div className={styles.adminTotal}>
-                  {`Total: ${adminLista.length}  ·  ${HORARIOS.map(
-                    (h) =>
-                      `${h}: ${adminLista.filter((r) => r.horario === h).length}/${CAPACITY}`
-                  ).join("  ·  ")}`}
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
         <div className={styles.disclaimer}>
-          Suas informações (nome, WhatsApp, e-mail, data de nascimento e horário) ficam visíveis para a equipe Floresça
-          responsável pela organização do evento.
+          Suas informações (nome, WhatsApp, e-mail, data de nascimento e horário) são protegidas e ficam visíveis apenas para a equipe organizadora.
+        </div>
+
+        <div style={{ textAlign: "center", marginTop: "18px" }}>
+          <Link
+            href="/login"
+            style={{
+              fontSize: "11px",
+              color: "#b7aaa1",
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+            }}
+          >
+            <span>🔒</span>
+            <span>Acesso da equipe</span>
+          </Link>
         </div>
       </div>
     </div>
