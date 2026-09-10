@@ -28,11 +28,9 @@ export type Rsvp = {
 };
 
 const DEFAULT_SLOTS: Omit<Slot, "id">[] = [
-  { horario: "09:00", capacity: 20, taken: 0, ordem: 1 },
-  { horario: "11:00", capacity: 20, taken: 0, ordem: 2 },
-  { horario: "14:00", capacity: 20, taken: 0, ordem: 3 },
-  { horario: "16:00", capacity: 20, taken: 0, ordem: 4 },
-  { horario: "18:00", capacity: 20, taken: 0, ordem: 5 },
+  { horario: "15h30", capacity: 20, taken: 0, ordem: 1 },
+  { horario: "16h30", capacity: 20, taken: 0, ordem: 2 },
+  { horario: "17h30", capacity: 20, taken: 0, ordem: 3 },
 ];
 
 /**
@@ -169,7 +167,7 @@ export async function submitRsvp({
     if (errMessage === "HORARIO_ESGOTADO") {
       return {
         success: false,
-        error: "Esse horário acabou de esgotar. Escolha outro logo abaixo.",
+        error: "Esse horário acabou de esgotar. Por favor, escolha outro.",
       };
     }
     console.error("Firestore RSVP error:", error);

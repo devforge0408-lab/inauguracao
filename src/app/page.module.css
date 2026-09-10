@@ -1,0 +1,275 @@
+.page {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  background: linear-gradient(180deg, #fbf6f1 0%, #f3e9e3 100%);
+  color: #4a3f3a;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.card {
+  background: #fff;
+  max-width: 460px;
+  width: 100%;
+  border-radius: 20px;
+  padding: 36px 32px 30px;
+  box-shadow: 0 10px 40px rgba(176, 126, 118, 0.18);
+  border: 1px solid #f0e1d9;
+  position: relative;
+}
+
+.logo {
+  display: block;
+  margin: 0 auto 6px;
+  width: 84px;
+  height: auto;
+}
+
+.card h1 {
+  text-align: center;
+  font-size: 24px;
+  font-weight: normal;
+  letter-spacing: 0.5px;
+  color: #b07e76;
+  margin: 4px 0 2px;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 14px;
+  color: #74896a;
+  margin: 0 0 22px;
+  letter-spacing: 0.3px;
+}
+
+.datePill {
+  display: block;
+  text-align: center;
+  margin: 0 auto 26px;
+  font-size: 13px;
+  color: #c9a24b;
+  background: #fbf3e4;
+  border: 1px solid #ebdbb8;
+  border-radius: 30px;
+  padding: 6px 16px;
+  width: fit-content;
+}
+
+.card label {
+  display: block;
+  font-size: 13px;
+  color: #4a3f3a;
+  margin-bottom: 6px;
+  margin-top: 18px;
+}
+
+.card input[type="text"],
+.card input[type="tel"] {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid #e4d5cc;
+  font-family: Georgia, serif;
+  font-size: 15px;
+  background: #fdfaf8;
+  color: #4a3f3a;
+}
+
+.card input[type="text"]:focus,
+.card input[type="tel"]:focus {
+  outline: none;
+  border-color: #c99a93;
+}
+
+.slots {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.slot {
+  flex: 1;
+  min-width: 100px;
+}
+
+.slot input {
+  display: none;
+}
+
+.slot label {
+  display: block;
+  margin: 0;
+  text-align: center;
+  padding: 12px 8px;
+  border-radius: 10px;
+  border: 1.5px solid #e4d5cc;
+  font-size: 14px;
+  color: #4a3f3a;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: #fdfaf8;
+}
+
+.slot small {
+  display: block;
+  font-size: 10.5px;
+  color: #b7aaa1;
+  margin-top: 3px;
+  font-style: italic;
+}
+
+.slot input:checked + label {
+  border-color: #74896a;
+  background: #eef2e9;
+  color: #74896a;
+  font-weight: bold;
+}
+
+.slot.full label {
+  border-color: #eee2dc;
+  background: #f7f1ee;
+  color: #c9bbb2;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.slot.full small {
+  color: #c77;
+  font-style: normal;
+  text-decoration: none;
+}
+
+.card button {
+  width: 100%;
+  margin-top: 26px;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: #74896a;
+  color: #fff;
+  font-family: Georgia, serif;
+  font-size: 15px;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.card button:hover {
+  background: #5e7256;
+}
+
+.card button:disabled {
+  background: #c9c1ba;
+  cursor: not-allowed;
+}
+
+.msg {
+  text-align: center;
+  font-size: 13px;
+  margin-top: 14px;
+  min-height: 18px;
+}
+
+.msgError {
+  color: #b0574e;
+}
+
+.msgSuccess {
+  color: #74896a;
+}
+
+.successView {
+  text-align: center;
+  padding: 10px 0 4px;
+}
+
+.successView .logo {
+  width: 90px;
+  margin-bottom: 10px;
+}
+
+.successView h2 {
+  font-size: 20px;
+  color: #b07e76;
+  font-weight: normal;
+  margin: 6px 0 8px;
+}
+
+.successView p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #4a3f3a;
+  margin: 0;
+}
+
+.adminToggle {
+  display: block;
+  text-align: center;
+  margin-top: 22px;
+  font-size: 11px;
+  color: #c9bbb2;
+  cursor: pointer;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  width: 100%;
+}
+
+.card button.adminToggle {
+  width: 100%;
+  margin-top: 22px;
+  padding: 0;
+  background: none;
+}
+
+.card button.adminToggle:hover {
+  background: none;
+}
+
+.adminPanel {
+  margin-top: 18px;
+  border-top: 1px dashed #e4d5cc;
+  padding-top: 16px;
+  font-size: 13px;
+}
+
+.adminPanel h3 {
+  font-size: 14px;
+  color: #74896a;
+  margin: 0 0 10px;
+  font-weight: normal;
+}
+
+.adminRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid #f3e9e3;
+}
+
+.adminTotal {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #c9a24b;
+  text-align: right;
+}
+
+.disclaimer {
+  font-size: 10.5px;
+  color: #bbada5;
+  text-align: center;
+  margin-top: 16px;
+  line-height: 1.5;
+}
+
+.loadingNote {
+  text-align: center;
+  font-size: 11px;
+  color: #c9bbb2;
+  margin-top: -4px;
+  margin-bottom: 4px;
+}
