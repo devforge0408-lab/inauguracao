@@ -2,13 +2,13 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Event slots: public can read availability and update capacity during booking
+    // Event slots: público pode consultar e decrementar vagas ao agendar
     match /events/{eventSlug}/slots/{slotId} {
       allow read: if true;
       allow write: if true;
     }
 
-    // Event RSVPs: only authenticated users can list all RSVPs; public can check a specific phone and create
+    // Event RSVPs: apenas autenticados listam todos; público pode checar o próprio número e criar
     match /events/{eventSlug}/rsvps/{rsvpId} {
       allow get: if true;
       allow list: if request.auth != null;

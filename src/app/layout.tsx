@@ -15,9 +15,36 @@ const display = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Confirme sua presença · Floresça",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://devforge-ti.web.app"
+  ),
+  title: "Floresça · Saúde Integral Feminina",
   description:
-    "Confirmação de presença para a inauguração do espaço Floresça — Método Floresça, sábado, 12 de setembro.",
+    "Confirmação de presença para a inauguração do espaço Floresça — Método Floresça.",
+  openGraph: {
+    title: "Floresça · Saúde Integral Feminina",
+    description:
+      "Confirme sua presença para a inauguração do espaço Floresça — Método Floresça.",
+    url: "/",
+    siteName: "Floresça",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Floresça - Saúde Integral Feminina",
+      },
+    ],
+    locale: "pt_BR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Floresça · Saúde Integral Feminina",
+    description:
+      "Confirme sua presença para a inauguração do espaço Floresça — Método Floresça.",
+    images: ["/og-image.png"],
+  },
   icons: {
     icon: "/brand/logo-floresca.png",
   },
