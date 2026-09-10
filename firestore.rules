@@ -1,0 +1,20 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Event slots: public can read availability and update capacity during booking
+    match /events/{eventSlug}/slots/{slotId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Event RSVPs: anyone can create their RSVP, reading list can be public or restricted to auth
+    match /events/{eventSlug}/rsvps/{rsvpId} {
+      allow read: if true;
+      allow create: if request.resource.data.nome is string
+                    && request.resource.data.whatsapp is string
+                    && request.resource.data.horario is string;
+      allow update, delete: if request.auth != null;
+    }
+  }
+}
