@@ -166,6 +166,36 @@ export async function updateSlotCapacity(
 }
 
 /**
+ * Synchronizes the public availability counter with the confirmed RSVPs.
+ */
+export async function updateSlotTaken(
+  eventSlug: string = "inauguracao",
+  slotIdOrHorario: string,
+  taken: number
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const parsedTaken = Number(taken);
+    if (!Number.isInteger(parsedTaken) || parsedTaken < 0) {
+      return { success: false, error: "A quantidade de reservas deve ser um número válido." };
+    }
+
+    const slotDocId = slotIdOrHorario.includes(":")
+      ? slotIdOrHorario.replace(":", "-")
+      : slotIdOrHorario;
+    const slotRef = doc(db, "events", eventSlug, "slots", slotDocId);
+
+    await setDoc(slotRef, { taken: parsedTaken }, { merge: true });
+    return { success: true };
+  } catch (error) {
+    console.error("Error synchronizing slot availability:", error);
+    return {
+      success: false,
+      error: "Não foi possível sincronizar a disponibilidade.",
+    };
+  }
+}
+
+/**
  * Submits an RSVP using a Firestore transaction to prevent double-booking and duplicate numbers
  */
 export async function submitRsvp({

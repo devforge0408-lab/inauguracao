@@ -12,6 +12,7 @@ import {
   subscribeToEventSlots,
   subscribeToEventRsvps,
   updateSlotCapacity,
+  updateSlotTaken,
   deleteRsvp,
   normalizePhone,
 } from "@/lib/firestore-service";
@@ -120,6 +121,35 @@ export default function AdminPage() {
       unsubRsvps();
     };
   }, [user]);
+
+  useEffect(() => {
+    if (!user || dataLoading || errorMsg || slots.length === 0) return;
+
+    const countsByHorario = rsvps.reduce<Record<string, number>>((counts, rsvp) => {
+      counts[rsvp.horario] = (counts[rsvp.horario] || 0) + 1;
+      return counts;
+    }, {});
+
+    const corrections = slots.filter(
+      (slot) => (slot.taken ?? 0) !== (countsByHorario[slot.horario] || 0)
+    );
+    if (corrections.length === 0) return;
+
+    let cancelled = false;
+    Promise.all(
+      corrections.map((slot) =>
+        updateSlotTaken(EVENT_SLUG, slot.id || slot.horario, countsByHorario[slot.horario] || 0)
+      )
+    ).catch((error) => {
+      if (!cancelled) {
+        console.error("Erro ao sincronizar contagem de vagas:", error);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, dataLoading, errorMsg, slots, rsvps]);
 
   const handleManualRefresh = async () => {
     setRefreshing(true);

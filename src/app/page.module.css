@@ -427,9 +427,14 @@
   box-sizing: border-box;
 }
 
-.slot label:hover {
-  border-color: #c99a93;
-  background: #fffafa;
+.slot.available label:hover {
+  border-color: #74896a;
+  background: #f5faf3;
+}
+
+.slot.full label:hover {
+  border-color: #eee2dc;
+  background: #f8f3f0;
 }
 
 .slot small {
@@ -438,6 +443,32 @@
   color: #9d8d85;
   margin-top: 3px;
   font-weight: normal;
+}
+
+.slotStatus {
+  letter-spacing: 0.1px;
+}
+
+.slotProgress {
+  display: block;
+  width: 100%;
+  height: 4px;
+  margin-top: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e7eee3;
+}
+
+.slotProgressBar {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #74896a;
+  transition: width 0.35s ease, background-color 0.2s ease;
+}
+
+.slot.available .slotStatus {
+  color: #74896a;
 }
 
 .slot input:checked + label {
@@ -459,6 +490,14 @@
 .slot.full small {
   color: #b0574e;
   font-weight: 500;
+}
+
+.slot.full .slotProgress {
+  background: #f4d9d5;
+}
+
+.slot.full .slotProgressBar {
+  background: #b0574e;
 }
 
 .card button[type="submit"] {
