@@ -130,7 +130,11 @@ export default function EmailConfigPage() {
     }
     setTestingId(recipient.id);
     try {
-      const payload = { to: recipient.email, templateSlug: testTemplateSlug };
+      const payload = {
+        to: recipient.email,
+        templateSlug: testTemplateSlug,
+        vars: { nome: recipient.nome },
+      };
 
       const res = await fetch("/api/email/send", {
         method: "POST",

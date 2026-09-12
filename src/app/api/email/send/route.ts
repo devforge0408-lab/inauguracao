@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getBrevoConfig, brevoFetch, friendlyBrevoError } from "@/lib/brevo";
-import { getEmailTemplate } from "@/lib/email-templates";
+import { getEmailTemplate, renderEmailTemplate } from "@/lib/email-templates";
 import { isValidEmail, normalizeEmail } from "@/lib/email-utils";
 
 export const dynamic = "force-dynamic";
@@ -10,6 +10,7 @@ const MAX_PAYLOADS = 500;
 type SendPayload = {
   to?: string;
   templateSlug?: string;
+  vars?: Record<string, string>;
   subject?: string;
   htmlContent?: string;
 };
@@ -23,10 +24,10 @@ type SendResult = {
 
 /**
  * POST /api/email/send — sends transactional e-mails through Brevo.
- * Body: { payloads: [{ to, templateSlug }] }
+ * Body: { payloads: [{ to, templateSlug, vars? }] }
  * Templates live on the site (src/lib/email-templates.ts); Brevo only delivers.
+ * `vars` personalizes {{nome}} and {{horario}} server-side (HTML-escaped).
  * A payload may also carry inline { to, subject, htmlContent } for test sends.
- * Content is 100% static — no params/placeholders are sent.
  */
 export async function POST(req: NextRequest) {
   const config = getBrevoConfig();
@@ -95,8 +96,9 @@ export async function POST(req: NextRequest) {
         });
         continue;
       }
-      subject = template.subject;
-      htmlContent = template.htmlContent;
+      const rendered = renderEmailTemplate(template, payload.vars);
+      subject = rendered.subject;
+      htmlContent = rendered.htmlContent;
     } else {
       subject = payload.subject?.trim();
       htmlContent = payload.htmlContent?.trim();

@@ -13,6 +13,13 @@ export type BrevoConfigStatus = {
   apiUrl: string;
 };
 
+export type EmailSendPayload = {
+  to: string;
+  templateSlug: string;
+  /** Substitui {{nome}} e {{horario}} no template no momento do envio. */
+  vars?: Record<string, string>;
+};
+
 export type EmailSendResult = {
   to: string;
   success: boolean;

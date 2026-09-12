@@ -13,6 +13,11 @@ import {
   RefreshCw,
 } from "lucide-react";
 
+const previewSample = (text: string) =>
+  text
+    .replace(/\{\{\s*nome\s*\}\}/gi, "Maria")
+    .replace(/\{\{\s*horario\s*\}\}/gi, "15h30");
+
 export default function EmailTemplatesPage() {
   const { user } = useAuth();
   const { toast, showToast, closeToast } = useToast();
@@ -136,9 +141,11 @@ export default function EmailTemplatesPage() {
           )}
 
           <p className="mt-3 text-xs text-[#8a7e78]">
-            Os templates são estáticos e ficam no código do site
+            Os templates ficam no código do site
             (<code className="bg-[#f8f2ed] px-1 rounded">src/lib/email-templates.ts</code>).
-            A Brevo é usada apenas para o disparo.
+            As variáveis <code className="bg-[#f8f2ed] px-1 rounded">{"{{nome}}"}</code> e{" "}
+            <code className="bg-[#f8f2ed] px-1 rounded">{"{{horario}}"}</code> são
+            substituídas pelo servidor no momento do envio.
           </p>
         </section>
 
@@ -152,12 +159,12 @@ export default function EmailTemplatesPage() {
           {selected ? (
             <>
               <div className="px-3 py-2 rounded-lg bg-[#eaf4f1] border border-[#cfe5de] text-sm text-[#3f7a6c] font-medium mb-3">
-                {selected.subject || "(sem assunto)"}
+                {previewSample(selected.subject) || "(sem assunto)"}
               </div>
               <iframe
                 title={`Pré-visualização: ${selected.name}`}
                 sandbox=""
-                srcDoc={selected.htmlContent}
+                srcDoc={previewSample(selected.htmlContent)}
                 className="w-full flex-1 min-h-[480px] rounded-xl border border-[#ede1d8] bg-white"
               />
             </>

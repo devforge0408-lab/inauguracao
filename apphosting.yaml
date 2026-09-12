@@ -50,3 +50,21 @@ env:
     availability:
       - BUILD
       - RUNTIME
+
+# Brevo (disparo de e-mails) — somente RUNTIME, usado pelas API routes server-side
+  - variable: BREVO_API_KEY
+    secret: BREVO_API_KEY
+    availability:
+      - RUNTIME
+  - variable: BREVO_SENDER_EMAIL
+    value: contato@florescasaudefeminina.com.br
+    availability:
+      - RUNTIME
+  - variable: BREVO_SENDER_NAME
+    value: Floresça
+    availability:
+      - RUNTIME
+  - variable: BREVO_API_URL
+    value: https://api.brevo.com/v3
+    availability:
+      - RUNTIME

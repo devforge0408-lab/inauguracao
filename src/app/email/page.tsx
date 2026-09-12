@@ -32,7 +32,16 @@ import {
 
 const EVENT_SLUG = "inauguracao";
 
-type PreparedPayload = { to: string; templateSlug: string };
+const previewSample = (text: string) =>
+  text
+    .replace(/\{\{\s*nome\s*\}\}/gi, "Maria")
+    .replace(/\{\{\s*horario\s*\}\}/gi, "15h30");
+
+type PreparedPayload = {
+  to: string;
+  templateSlug: string;
+  vars: { nome: string; horario: string };
+};
 
 export default function EmailSendPage() {
   const { user } = useAuth();
@@ -174,6 +183,7 @@ export default function EmailSendPage() {
     selectedValid.map((r) => ({
       to: normalizeEmail(r.email || ""),
       templateSlug: selectedTemplate!.slug,
+      vars: { nome: r.nome, horario: r.horario },
     }));
 
   const handleAction = async () => {
@@ -292,13 +302,13 @@ export default function EmailSendPage() {
                     </span>
                   </div>
                   <div className="px-3 py-2 rounded-lg bg-[#eaf4f1] border border-[#cfe5de] text-sm text-[#3f7a6c] font-medium mb-3 truncate">
-                    {selectedTemplate.subject || "(sem assunto)"}
+                    {previewSample(selectedTemplate.subject) || "(sem assunto)"}
                   </div>
                   {selectedTemplate.htmlContent ? (
                     <iframe
                       title="Pré-visualização do template"
                       sandbox=""
-                      srcDoc={selectedTemplate.htmlContent}
+                      srcDoc={previewSample(selectedTemplate.htmlContent)}
                       className="w-full flex-1 min-h-[280px] rounded-xl border border-[#ede1d8] bg-white"
                     />
                   ) : (
@@ -501,7 +511,9 @@ export default function EmailSendPage() {
                   className="flex items-center justify-between px-4 py-2 text-xs"
                 >
                   <span className="font-mono text-[#453127]">{p.to}</span>
-                  <span className="text-[#8a7e78]">template: {p.templateSlug}</span>
+                  <span className="text-[#8a7e78]">
+                    {p.templateSlug} · {p.vars.nome} ({p.vars.horario})
+                  </span>
                 </div>
               ))}
             </div>
