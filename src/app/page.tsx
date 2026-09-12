@@ -5,10 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "./page.module.css";
 import {
-  Rsvp,
   Slot,
   subscribeToEventSlots,
-  subscribeToEventRsvps,
   submitRsvp,
 } from "@/lib/firestore-service";
 
@@ -127,8 +125,6 @@ function downloadIcs(horario: string, guestName: string) {
 export default function InauguracaoPage() {
   const [slots, setSlots] = useState<Slot[] | null>(null);
   const [slotsError, setSlotsError] = useState(false);
-  const [rsvps, setRsvps] = useState<Rsvp[] | null>(null);
-  const [rsvpsError, setRsvpsError] = useState(false);
 
   const [nome, setNome] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -175,22 +171,6 @@ export default function InauguracaoPage() {
       (err) => {
         console.error("Erro ao assinar slots:", err);
         setSlotsError(true);
-      }
-    );
-
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = subscribeToEventRsvps(
-      EVENT_SLUG,
-      (lista) => {
-        setRsvps(lista);
-        setRsvpsError(false);
-      },
-      (err) => {
-        console.error("Erro ao assinar RSVPs:", err);
-        setRsvpsError(true);
       }
     );
 
@@ -261,11 +241,6 @@ export default function InauguracaoPage() {
     setShowConfetti(true);
     setSubmitting(false);
   }
-
-  const rsvpCountsByHorario = rsvps?.reduce<Record<string, number>>((counts, rsvp) => {
-    counts[rsvp.horario] = (counts[rsvp.horario] || 0) + 1;
-    return counts;
-  }, {}) ?? {};
 
   const displaySlots = slots && slots.length > 0 ? slots : DEFAULT_SLOTS;
 
@@ -459,20 +434,12 @@ export default function InauguracaoPage() {
                 <div className={styles.loadingNote}>Carregando horários disponíveis...</div>
               ) : null}
 
-              {rsvpsError ? (
-                <div className={styles.loadingNote}>
-                  Não foi possível carregar as vagas — tente recarregar a página.
-                </div>
-              ) : rsvps === null ? (
-                <div className={styles.loadingNote}>Carregando vagas...</div>
-              ) : null}
-
               <div className={styles.slots}>
                 {displaySlots.map((s) => {
                   const capacity = s.capacity !== undefined ? s.capacity : 20;
-                  const taken = rsvpCountsByHorario[s.horario] ?? 0;
+                  const taken = s.taken ?? 0;
                   const remaining = capacity - taken;
-                  const cheio = rsvps !== null && remaining <= 0;
+                  const cheio = slots !== null && remaining <= 0;
                   const progress =
                     capacity > 0 ? Math.min(100, Math.max(0, (taken / capacity) * 100)) : 100;
 

@@ -220,13 +220,10 @@ export async function submitRsvp({
 
   try {
     await runTransaction(db, async (transaction) => {
-      // 1. Check if user with this phone already registered
-      const existingRsvp = await transaction.get(rsvpDocRef);
-      if (existingRsvp.exists()) {
-        throw new Error("WHATSAPP_EXISTS");
-      }
+      // Uniqueness per WhatsApp is enforced by Firestore rules (!exists on create);
+      // anonymous reads of rsvp docs are not allowed.
 
-      // 2. Check slot capacity
+      // 1. Check slot capacity
       const slotDoc = await transaction.get(slotRef);
       if (!slotDoc.exists()) {
         // If slot doc doesn't exist, create it with capacity 20 and taken 1
@@ -250,7 +247,7 @@ export async function submitRsvp({
         });
       }
 
-      // 3. Insert RSVP
+      // 2. Insert RSVP
       transaction.set(rsvpDocRef, {
         event_slug: eventSlug,
         nome,
@@ -266,7 +263,11 @@ export async function submitRsvp({
     return { success: true };
   } catch (error: unknown) {
     const errMessage = error instanceof Error ? error.message : String(error);
-    if (errMessage === "WHATSAPP_EXISTS") {
+    const errCode =
+      error && typeof error === "object" && "code" in error
+        ? (error as { code?: string }).code
+        : undefined;
+    if (errMessage === "WHATSAPP_EXISTS" || errCode === "permission-denied") {
       return {
         success: false,
         error: "Esse WhatsApp já tem presença confirmada. Fale com a equipe para trocar o horário.",

@@ -432,6 +432,14 @@ export default function AdminPage() {
           </div>
 
           <div className="hidden sm:flex items-center gap-3">
+            <Link
+              href="/email"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#3f7a6c] hover:text-[#356a5e] bg-[#eaf4f1] hover:bg-[#dcede7] rounded-lg transition-colors border border-[#cfe5de] font-medium cursor-pointer"
+            >
+              <Mail className="w-3.5 h-3.5" />
+              <span>Disparo de E-mails</span>
+            </Link>
+
             <button
               onClick={handleOpenBatchModal}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#74896a] hover:text-[#5e7256] bg-[#eef2e9] hover:bg-[#e4ebd9] rounded-lg transition-colors border border-[#d3e3cc] font-medium cursor-pointer"
@@ -497,13 +505,22 @@ export default function AdminPage() {
           <h2 className="font-serif text-sm font-semibold uppercase tracking-wider text-[#8a7e78]">
             Ocupação & Horários
           </h2>
-          <button
-            onClick={handleOpenBatchModal}
-            className="sm:hidden inline-flex items-center gap-1 text-xs text-[#74896a] font-medium bg-[#eef2e9] px-2.5 py-1 rounded-lg border border-[#d3e3cc]"
-          >
-            <SlidersHorizontal className="w-3 h-3" />
-            <span>Configurar Vagas</span>
-          </button>
+          <div className="sm:hidden flex items-center gap-2">
+            <Link
+              href="/email"
+              className="inline-flex items-center gap-1 text-xs text-[#3f7a6c] font-medium bg-[#eaf4f1] px-2.5 py-1 rounded-lg border border-[#cfe5de]"
+            >
+              <Mail className="w-3 h-3" />
+              <span>E-mails</span>
+            </Link>
+            <button
+              onClick={handleOpenBatchModal}
+              className="inline-flex items-center gap-1 text-xs text-[#74896a] font-medium bg-[#eef2e9] px-2.5 py-1 rounded-lg border border-[#d3e3cc]"
+            >
+              <SlidersHorizontal className="w-3 h-3" />
+              <span>Configurar Vagas</span>
+            </button>
+          </div>
         </div>
 
         {/* Stats Grid */}

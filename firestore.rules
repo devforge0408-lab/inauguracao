@@ -2,19 +2,31 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Event slots: público pode consultar e decrementar vagas ao agendar
+    // Event slots: público pode consultar e reservar vagas ao agendar
     match /events/{eventSlug}/slots/{slotId} {
       allow read: if true;
       allow write: if true;
     }
 
-    // Event RSVPs: listagem pública temporária para exibir ocupação real no formulário
+    // Event RSVPs: contêm dados pessoais (nome, WhatsApp, e-mail, nascimento) —
+    // leitura restrita a usuários autenticados para não expor a base de e-mails.
+    // O formulário público cria via transação; !exists garante unicidade por WhatsApp.
     match /events/{eventSlug}/rsvps/{rsvpId} {
-      allow get: if true;
-      allow list: if true;
+      allow get, list: if request.auth != null;
       allow create: if request.resource.data.nome is string
                     && request.resource.data.whatsapp is string
-                    && request.resource.data.horario is string;
+                    && request.resource.data.horario is string
+                    && !exists(/databases/$(database)/documents/events/$(eventSlug)/rsvps/$(rsvpId));
+      allow update, delete: if request.auth != null;
+    }
+
+    // Destinatários de teste do módulo de e-mail: apenas usuários autenticados
+    match /events/{eventSlug}/emailTestRecipients/{recipientId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                    && request.resource.data.keys().hasOnly(["nome", "email", "created_at"])
+                    && request.resource.data.nome is string
+                    && request.resource.data.email is string;
       allow update, delete: if request.auth != null;
     }
   }
