@@ -5,6 +5,8 @@ const SITE_URL = (
 const STORE_URL = "https://store.florescasaudefeminina.com.br/";
 const MAPS_URL =
   "https://www.google.com/maps/search/?api=1&query=Rua+Cap.+Cassiano+Ricardo+de+Toledo,+191+-+Ch%C3%A1cara+Urbana,+Jundia%C3%AD+-+SP,+13201-840";
+const INSTAGRAM_URL = "https://www.instagram.com/florescasaudefeminina_/";
+const WHATSAPP_URL = "https://wa.me/5511914430297";
 
 export type LocalEmailTemplate = {
   slug: string;
@@ -144,6 +146,50 @@ const RESGATE_HTML = emailLayout(`
     </td>
   </tr>`);
 
+const LEMBRETE_HOJE_HTML = emailLayout(`
+  ${emailHeader("Método Floresça", "Bom dia — é hoje!")}
+  <tr>
+    <td style="padding:32px 32px 28px;">
+      ${P("Bom dia, {{nome}}! ☀️🌸")}
+      ${P("<strong>É hoje!</strong> A inauguração do Espaço Floresça acontece nesta tarde e estamos te aguardando de portas abertas.")}
+      ${infoBox("🕰️ <strong>Hoje, sábado, 12 de setembro</strong> — seu horário: <strong>{{horario}}</strong><br />📍 Golden Office · Sala 1108<br />Rua Cap. Cassiano Ricardo de Toledo, 191 — Chácara Urbana, Jundiaí - SP")}
+      ${P("Chegue com alguns minutinhos de antecedência para aproveitar cada detalhe que preparamos com carinho para você.")}
+      ${P("Precisa do caminho? Toque no botão abaixo:")}
+      ${ctaButton("Como chegar ↗", MAPS_URL)}
+      <p style="margin:22px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:#8a7e78;">
+        Se surgir algum imprevisto, é só responder este e-mail. Até já! 💛
+      </p>
+    </td>
+  </tr>`);
+
+const REDES_SOCIAIS_HTML = emailLayout(`
+  ${emailHeader("Método Floresça", "Continue perto da gente")}
+  <tr>
+    <td style="padding:32px 32px 28px;">
+      ${P("Olá, {{nome}}! 🌸")}
+      ${P("Quer continuar acompanhando o Método Floresça de pertinho? Nosso Instagram está cheio de conteúdo sobre saúde integral feminina, bastidores e novidades do espaço:")}
+      ${ctaButton("Seguir no Instagram ↗", INSTAGRAM_URL)}
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
+        <tr>
+          <td style="border-top:1px solid #f3e9e3;"></td>
+        </tr>
+      </table>
+      ${P("E se precisar de ajuda, tiver dúvidas ou quiser falar com a nossa equipe, o WhatsApp está sempre aberto para você:")}
+      <table role="presentation" cellpadding="0" cellspacing="0" align="center" style="margin:0 auto;">
+        <tr>
+          <td align="center" style="background-color:#5e9e90;border-radius:12px;">
+            <a href="${WHATSAPP_URL}" target="_blank" style="display:inline-block;padding:14px 36px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;color:#ffffff;text-decoration:none;">
+              Chamar no WhatsApp ↗
+            </a>
+          </td>
+        </tr>
+      </table>
+      <p style="margin:22px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:1.5;color:#8a7e78;">
+        Suporte e contato: WhatsApp (11) 91443-0297 · @florescasaudefeminina_
+      </p>
+    </td>
+  </tr>`);
+
 const TESTE_CONEXAO_HTML = emailLayout(`
   <tr>
     <td style="padding:32px 32px 28px;">
@@ -158,6 +204,12 @@ const TESTE_CONEXAO_HTML = emailLayout(`
   </tr>`);
 
 export const EMAIL_TEMPLATES: LocalEmailTemplate[] = [
+  {
+    slug: "lembrete-dia-do-evento",
+    name: "Lembrete · É hoje! (manhã do evento)",
+    subject: "☀️ É hoje, {{nome}}! Te esperamos na inauguração",
+    htmlContent: LEMBRETE_HOJE_HTML,
+  },
   {
     slug: "lembrete-inauguracao",
     name: "Lembrete · É amanhã!",
@@ -181,6 +233,12 @@ export const EMAIL_TEMPLATES: LocalEmailTemplate[] = [
     name: "Pós-evento · Resgate (30% OFF)",
     subject: "🌸 {{nome}}, ainda dá tempo: 30% OFF na Floresça",
     htmlContent: RESGATE_HTML,
+  },
+  {
+    slug: "redes-sociais",
+    name: "Relacionamento · Instagram + WhatsApp",
+    subject: "🌸 {{nome}}, continue perto da gente no Instagram e WhatsApp",
+    htmlContent: REDES_SOCIAIS_HTML,
   },
   {
     slug: "teste-conexao",
